@@ -7,11 +7,11 @@ import org.springframework.transaction.annotation.Transactional
 @Component
 class TaskDispatcher(val taskRepo: TaskRepository, val handlers: List<TaskExecutor>) {
 
+    @Transactional
     fun planRound() {
         for (task in taskRepo.findAllByStatusIs(Status.PENDING)) {
             if (!task.executed) {
                 try {
-                    task.status = Status.RUNNING
                     taskRepo.save(task)
                     executeTask(task)
                 } catch (e: Exception) {
