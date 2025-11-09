@@ -7,12 +7,14 @@ import org.springframework.stereotype.Component
 @Component
 class MigrationExecutor(override val goal: Task.Goal = Task.Goal.MIGRATION) : TaskExecutor {
 
-    override fun execute(current: CurrentTask): List<List<PlannedTask>> {
+    override fun execute(current: CurrentTask): PlannedTasks {
         println("Постановка основных задач")
 
-        return listOf(
-            listOf(PlannedTask(goal = Goal.LOAD_PROJECTS, description = "Загрузка всех данных проектов")),
-            listOf(PlannedTask(goal = Goal.FILL_PROJECTS, description = "Выгрузка проектов в целевые проекты"))
+        return PlannedTasks(
+            PlannedTask(goal = Goal.LOAD_PROJECTS, description = "Загрузка всех данных проектов")
+        ).nextStage(
+            PlannedTask(goal = Goal.FILL_PROJECTS, description = "Выгрузка проектов в целевые проекты")
         )
+
     }
 }

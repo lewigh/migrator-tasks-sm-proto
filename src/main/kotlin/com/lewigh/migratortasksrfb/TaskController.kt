@@ -21,6 +21,12 @@ public class TaskController(val repo: TaskRepository, val service: TaskDispatche
         service.createMigration()
     }
 
+    @Transactional
+    @GetMapping("next")
+    fun next() {
+        service.planRound()
+    }
+
     class TaskDto(
         var id: Long,
         var description: String,
@@ -43,7 +49,7 @@ public class TaskController(val repo: TaskRepository, val service: TaskDispatche
             description = task.description,
             stage = task.stage,
             executed = task.executed,
-            children = task.children.map { mapT(it) }.toMutableList()
+            children = task.subtasks.map { mapT(it) }.toMutableList()
         )
     }
 }

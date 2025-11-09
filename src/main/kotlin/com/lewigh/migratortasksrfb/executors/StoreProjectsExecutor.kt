@@ -8,8 +8,8 @@ import java.util.*
 @Component
 class StoreProjectsExecutor(override val goal: Task.Goal = Task.Goal.FILL_PROJECTS) : TaskExecutor {
 
-    override fun execute(current: CurrentTask): List<List<PlannedTask>> {
+    override fun execute(current: CurrentTask): PlannedTasks {
         println("Постановка задач на выгрузку проектов")
-        return listOf()
+        return PlannedTasks()
     }
 }

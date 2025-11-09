@@ -8,10 +8,10 @@ import java.util.*
 @Component
 class LoadProjectExecutor(override val goal: Task.Goal = Task.Goal.LOAD_PROJECT) : TaskExecutor {
 
-    override fun execute(current: CurrentTask): List<List<PlannedTask>> {
+    override fun execute(current: CurrentTask): PlannedTasks {
         println("Загрузка проекта")
-        Thread.sleep(20_000)
+        //Thread.sleep(20_000)
         println("Проект загружен")
-        return listOf()
+        return PlannedTasks()
     }
 }

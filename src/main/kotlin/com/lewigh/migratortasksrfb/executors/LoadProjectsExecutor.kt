@@ -7,14 +7,12 @@ import org.springframework.stereotype.Component
 @Component
 class LoadProjectsExecutor(override val goal: Task.Goal = Task.Goal.LOAD_PROJECTS) : TaskExecutor {
 
-    override fun execute(current: CurrentTask): List<List<PlannedTask>> {
+    override fun execute(current: CurrentTask): PlannedTasks {
         println("Загрузка проектов")
 
-        return listOf(
-            listOf(
-                PlannedTask(goal = Goal.LOAD_PROJECT, description = "Загрузка проекта 1"),
-                PlannedTask(goal = Goal.LOAD_PROJECT, description = "Загрузка проекта 2")
-            )
+        return PlannedTasks(
+            PlannedTask(goal = Goal.LOAD_PROJECT, description = "Загрузка проекта 1"),
+            PlannedTask(goal = Goal.LOAD_PROJECT, description = "Загрузка проекта 2")
         )
     }
 }

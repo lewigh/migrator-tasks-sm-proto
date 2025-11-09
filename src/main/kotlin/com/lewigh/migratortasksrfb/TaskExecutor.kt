@@ -4,24 +4,29 @@ interface TaskExecutor {
 
     val goal: Task.Goal
 
-    fun execute(current: CurrentTask): List<List<PlannedTask>>
+    fun execute(current: CurrentTask): PlannedTasks
 }
 
 data class CurrentTask(val description: String)
 
 
-interface PlannableTask {
-    fun planned(): List<List<PlannedTask>>
-}
-
 data class PlannedTask(val goal: Task.Goal, val description: String)
 
-class StagedPlannedTasks(vararg fisrtPriorityTasks: PlannedTask) {
+class PlannedTasks(vararg var firstStage: PlannedTask) {
+    private val extraStages: MutableList<List<PlannedTask>> = mutableListOf()
 
-    private val stages: MutableList<List<PlannedTask>> = mutableListOf(fisrtPriorityTasks.toMutableList())
+    fun nextStage(vararg nextPriorityTasks: PlannedTask): PlannedTasks {
+        if (nextPriorityTasks.isNotEmpty()) {
+            extraStages.add(nextPriorityTasks.toMutableList())
+        }
 
-    fun nextStage(vararg nextPriorityTasks: PlannedTask): StagedPlannedTasks {
-        stages.add(nextPriorityTasks.toMutableList())
         return this
     }
+
+    fun extraStages(): List<List<PlannedTask>> = extraStages
+
+    fun isEmpty(): Boolean = firstStage.isEmpty() && extraStages.isEmpty()
 }
+
+
+
