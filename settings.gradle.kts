@@ -1,1 +1,1 @@
-rootProject.name = "migrator-tasks-rfb"
+rootProject.name = "migrator-tasks-sm-proto"

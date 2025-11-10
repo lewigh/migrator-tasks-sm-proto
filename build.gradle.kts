@@ -8,7 +8,7 @@ plugins {
 
 group = "com.lewigh"
 version = "0.0.1-SNAPSHOT"
-description = "migrator-tasks-rfb"
+description = "migrator-tasks-sm-proto"
 
 java {
     toolchain {
