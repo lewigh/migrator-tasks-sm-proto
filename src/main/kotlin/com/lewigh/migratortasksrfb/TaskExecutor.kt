@@ -1,32 +1,49 @@
 package com.lewigh.migratortasksrfb
 
+import com.lewigh.migratortasksrfb.Task.*
+
 interface TaskExecutor {
 
     val goal: Task.Goal
 
-    fun execute(current: CurrentTask): PlannedTasks
+    fun execute(current: CurrentTask, planner: TaskPlanner)
+
+    fun rollback(current: CurrentTask) {
+    }
 }
 
 data class CurrentTask(val description: String)
 
-
 data class PlannedTask(val goal: Task.Goal, val description: String)
 
-class PlannedTasks(vararg var firstStage: PlannedTask) {
-    private val extraStages: MutableList<List<PlannedTask>> = mutableListOf()
+private const val READY_TO_PENDING: Int = 0;
 
-    fun nextStage(vararg nextPriorityTasks: PlannedTask): PlannedTasks {
-        if (nextPriorityTasks.isNotEmpty()) {
-            extraStages.add(nextPriorityTasks.toMutableList())
+data class TaskPlanner(private val parent: Task, private var currentStage: Int = 0) {
+    fun stage(vararg tasks: PlannedTask): TaskPlanner {
+        if (tasks.isEmpty()) {
+            return this;
         }
 
-        return this
+        var plannedStatus = if (currentStage == READY_TO_PENDING) {
+            Status.PENDING
+        } else {
+            Status.WAITING
+        }
+
+        for (task in tasks) {
+            val newSubtask = Task(
+                description = task.description,
+                goal = task.goal,
+                status = plannedStatus,
+                stage = currentStage,
+                parent = parent
+            )
+            parent.subtasks.add(newSubtask)
+        }
+
+        currentStage++
+        return this;
     }
-
-    fun extraStages(): List<List<PlannedTask>> = extraStages
-
-    fun isEmpty(): Boolean = firstStage.isEmpty() && extraStages.isEmpty()
 }
-
 
 

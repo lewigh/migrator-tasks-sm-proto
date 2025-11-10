@@ -8,10 +8,12 @@ import java.util.*
 @Component
 class LoadProjectExecutor(override val goal: Task.Goal = Task.Goal.LOAD_PROJECT) : TaskExecutor {
 
-    override fun execute(current: CurrentTask): PlannedTasks {
+    override fun execute(current: CurrentTask, planner: TaskPlanner) {
         println("Загрузка проекта")
-        //Thread.sleep(20_000)
-        println("Проект загружен")
-        return PlannedTasks()
+        planner.stage(
+            PlannedTask(goal = Goal.LOAD_PROJECT_SCHEMA, description = "Загрузка схемы 1 проекта"),
+            PlannedTask(goal = Goal.LOAD_PROJECT_ACTORS, description = "Загрузка акторов проекта"),
+            PlannedTask(goal = Goal.LOAD_PROJECT_COMMENTS, description = "Загрузка комментариев проекта")
+        )
     }
 }

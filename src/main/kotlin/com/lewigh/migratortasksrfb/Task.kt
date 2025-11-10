@@ -14,10 +14,11 @@ class Task(
     var parent: Task? = null,
     var goal: Goal,
     var params: String? = null,
+    @Lob
     var error: String? = null,
     @OneToMany(mappedBy = "parent")
     var subtasks: MutableList<Task> = mutableListOf(),
-    var status: Status = Status.PENDING,
+    var status: Status,
     var stage: Int = 0,
     var executed: Boolean = false,
 ) {
@@ -28,8 +29,8 @@ class Task(
     fun isError(): Boolean = status == Status.ERROR
     fun isWaiting(): Boolean = status == Status.WAITING
     fun isCorrupted(): Boolean = status == Status.CORRUPTED
-
     fun isAllSubtaskDone(): Boolean = subtasks.all { it.isDone() }
+    fun isAnySubtaskFailured(): Boolean = subtasks.any { it.isError() || it.isCorrupted() }
 
     fun done() {
         parent?.status = Status.PENDING
@@ -44,12 +45,22 @@ class Task(
         status = Status.PENDING
     }
 
-    fun error(exception: Exception) {
-        var text = exception.stackTrace
-            .map { "${it.fileName}:${it.className}:${it.methodName}:${it.lineNumber}" }
-            .joinToString { it }
+    fun toCorrupted() {
+        status = Status.CORRUPTED
+    }
 
-        error(text)
+    fun error(exception: Exception) {
+
+        var cur: Throwable? = exception
+        var res: String = ""
+
+        while (cur != null) {
+            var st = cur.stackTrace.first() ?: null
+            res += "${cur.message}:${st?.fileName}:${st?.methodName}:${st?.lineNumber}"
+            cur = cur.cause
+        }
+
+        error(res)
     }
 
     fun error(text: String) {
@@ -65,7 +76,7 @@ class Task(
         LOAD_PROJECT,
         LOAD_PROJECT_SCHEMA,
         LOAD_PROJECT_ACTORS,
-        LOAD_PROJECT_ISSUES,
+        LOAD_PROJECT_COMMENTS,
     }
 
     enum class Status {

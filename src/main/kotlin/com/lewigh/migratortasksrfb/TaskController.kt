@@ -4,13 +4,18 @@ import com.lewigh.migratortasksrfb.Task.*
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.*
 
 @RestController
-public class TaskController(val repo: TaskRepository, val service: TaskDispatcher) {
+public class TaskController(
+    val repo: TaskRepository,
+    val service: TaskDispatcher,
+    private val error: View,
+    private val taskDispatcher: TaskDispatcher
+) {
 
     @GetMapping
     fun getAllTasks(): List<TaskDto> {
-
         return repo.findAllByGoal(Task.Goal.MIGRATION)
             .map { mapT(it) }
     }
@@ -35,10 +40,9 @@ public class TaskController(val repo: TaskRepository, val service: TaskDispatche
         var status: Status,
         var stage: Int,
         var executed: Boolean,
-        var children: MutableList<TaskDto> = mutableListOf()
+        var error: String?,
+        var subtasks: MutableList<TaskDto>
     )
-
-    data class Info(val task: Task, val childred: List<Info>)
 
     fun mapT(task: Task): TaskDto {
         return TaskDto(
@@ -49,7 +53,8 @@ public class TaskController(val repo: TaskRepository, val service: TaskDispatche
             description = task.description,
             stage = task.stage,
             executed = task.executed,
-            children = task.subtasks.map { mapT(it) }.toMutableList()
+            subtasks = task.subtasks.map { mapT(it) }.toMutableList(),
+            error = task.error
         )
     }
 }

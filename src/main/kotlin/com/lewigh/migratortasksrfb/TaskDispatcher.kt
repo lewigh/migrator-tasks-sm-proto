@@ -12,7 +12,6 @@ class TaskDispatcher(val taskRepo: TaskRepository, val handlers: List<TaskExecut
         for (task in taskRepo.findAllByStatusIs(Status.PENDING)) {
             if (!task.executed) {
                 try {
-                    taskRepo.save(task)
                     executeTask(task)
                 } catch (e: Exception) {
                     task.error(e)
@@ -29,24 +28,18 @@ class TaskDispatcher(val taskRepo: TaskRepository, val handlers: List<TaskExecut
 
         currentTask.status = Status.RUNNING
         taskRepo.flush()
-        val plannedTasks = executor.execute(CurrentTask(currentTask.description))
+
+        executor.execute(CurrentTask(currentTask.description), TaskPlanner(currentTask))
+
         currentTask.executed = true
 
-        if (plannedTasks.isEmpty()) {
+        if (currentTask.subtasks.isEmpty()) {
             currentTask.done()
             return
         }
 
-        for (task in plannedTasks.firstStage) {
-            taskRepo.save(Task(description = task.description, goal = task.goal, status = Status.PENDING, stage = 0, parent = currentTask))
-        }
-
-        val extra = plannedTasks.extraStages()
-
-        for (stageNumber in 0..<extra.size) {
-            for (task in extra[stageNumber]) {
-                taskRepo.save(Task(description = task.description, goal = task.goal, status = Status.WAITING, stage = stageNumber + 1, parent = currentTask))
-            }
+        for (subtask in currentTask.subtasks) {
+            taskRepo.save(subtask)
         }
 
         currentTask.waitTo()
@@ -59,7 +52,12 @@ class TaskDispatcher(val taskRepo: TaskRepository, val handlers: List<TaskExecut
             return
         }
 
-        if (task.subtasks.all { it.status != Status.DONE || it.status != Status.WAITING }) {
+        if (task.isAnySubtaskFailured()) {
+            task.toCorrupted()
+            return
+        }
+
+        if (task.subtasks.all { it.status == Status.DONE || it.status == Status.WAITING }) {
             task.subtasks.asSequence()
                 .filter { it.isWaiting() }
                 .groupBy { it.stage }
