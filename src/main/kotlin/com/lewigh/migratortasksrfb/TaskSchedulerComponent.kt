@@ -8,6 +8,6 @@ class TaskSchedulerComponent(val service: TaskDispatcher) {
 
     @Scheduled(fixedRate = 5000)
     fun handle() {
-        service.planRound()
+        //service.planRound()
     }
 }

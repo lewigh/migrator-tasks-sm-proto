@@ -1,10 +1,10 @@
-package com.lewigh.migratortasksrfb.executors
+package com.lewigh.migratortasksrfb.executors.migrate_project.fill.comments
 
 import com.lewigh.migratortasksrfb.*
 import org.springframework.stereotype.Component
 
 @Component
-class LoadProjectActorsExecutor(override val goal: Task.Goal = Task.Goal.LOAD_PROJECT_ACTORS) : TaskExecutor {
+class FillProjectCommentsExecutor(override val goal: Task.Goal = Task.Goal.FILL_PROJECT_COMMENTS) : TaskExecutor {
 
     override fun execute(current: CurrentTask, planner: TaskPlanner) {
         println("Загрузка схемы проекта")

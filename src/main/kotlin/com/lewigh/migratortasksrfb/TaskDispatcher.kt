@@ -27,6 +27,7 @@ class TaskDispatcher(val taskRepo: TaskRepository, val handlers: List<TaskExecut
         val executor = handlers.find { it.goal == currentTask.goal } ?: throw Exception()
 
         currentTask.status = Status.RUNNING
+        currentTask.run()
         taskRepo.flush()
 
         executor.execute(CurrentTask(currentTask.description), TaskPlanner(currentTask))
@@ -57,21 +58,17 @@ class TaskDispatcher(val taskRepo: TaskRepository, val handlers: List<TaskExecut
             return
         }
 
-        if (task.subtasks.all { it.status == Status.DONE || it.status == Status.WAITING }) {
-            task.subtasks.asSequence()
-                .filter { it.isWaiting() }
-                .groupBy { it.stage }
-                .toSortedMap()
-                .firstEntry().value
-                .forEach { it.pending() }
+        if (task.hasSubtasksToPlan()) {
+            task.planNextStageWaitingTasks()
         }
+
         task.waitTo()
     }
 
 
     @Transactional
-    fun createMigration(): Task {
-        val migrationTask = Task(goal = Task.Goal.MIGRATION, status = Status.PENDING, description = "Миграция данных")
+    fun planNew(planned: PlannedTask): Task {
+        val migrationTask = Task(goal = planned.goal, status = Status.PENDING, description = planned.description)
 
         return taskRepo.save(migrationTask)
     }

@@ -1,4 +1,4 @@
-package com.lewigh.migratortasksrfb.executors
+package com.lewigh.migratortasksrfb.executors.migrate_project.load.schema
 
 import com.lewigh.migratortasksrfb.*
 import org.springframework.stereotype.Component
@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component
 class LoadProjectSchemaExecutor(override val goal: Task.Goal = Task.Goal.LOAD_PROJECT_SCHEMA) : TaskExecutor {
 
     override fun execute(current: CurrentTask, planner: TaskPlanner) {
-        println("Загрузка схемы проекта")
-        throw RuntimeException("AAA")
+        println("Загрузка схем проекта Меркурий")
+        //throw RuntimeException("AAA")
         //Thread.sleep(20_000)
-        println("Проект загружен")
+        println("Схемы проекта Меркурий загружены")
     }
 }

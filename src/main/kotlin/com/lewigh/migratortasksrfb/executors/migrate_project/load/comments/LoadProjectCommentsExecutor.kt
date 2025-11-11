@@ -1,4 +1,4 @@
-package com.lewigh.migratortasksrfb.executors
+package com.lewigh.migratortasksrfb.executors.migrate_project.load.comments
 
 import com.lewigh.migratortasksrfb.*
 import org.springframework.stereotype.Component
@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component
 class LoadProjectCommentsExecutor(override val goal: Task.Goal = Task.Goal.LOAD_PROJECT_COMMENTS) : TaskExecutor {
 
     override fun execute(current: CurrentTask, planner: TaskPlanner) {
-        println("Загрузка схемы проекта")
+        println("Загрузка комментариев проекта Меркурий")
         //throw RuntimeException("AAA")
         //Thread.sleep(20_000)
-        println("Проект загружен")
+        println("Комментарии проекта Меркурий загружены")
     }
 }

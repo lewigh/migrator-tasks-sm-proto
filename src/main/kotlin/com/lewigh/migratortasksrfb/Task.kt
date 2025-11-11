@@ -31,10 +31,15 @@ class Task(
     fun isCorrupted(): Boolean = status == Status.CORRUPTED
     fun isAllSubtaskDone(): Boolean = subtasks.all { it.isDone() }
     fun isAnySubtaskFailured(): Boolean = subtasks.any { it.isError() || it.isCorrupted() }
+    fun hasSubtasksToPlan(): Boolean = subtasks.all { it.status == Status.DONE || it.status == Status.WAITING }
 
     fun done() {
         parent?.status = Status.PENDING
         status = Status.DONE
+    }
+
+    fun run() {
+        status = Status.RUNNING
     }
 
     fun waitTo() {
@@ -69,14 +74,27 @@ class Task(
         parent?.status = Status.PENDING
     }
 
+    fun planNextStageWaitingTasks() {
+        subtasks.asSequence()
+            .filter { it.isWaiting() }
+            .groupBy { it.stage }
+            .toSortedMap()
+            .firstEntry().value
+            .forEach { it.pending() }
+    }
+
     enum class Goal {
-        MIGRATION,
+        MIGRATE_PROJECT,
         LOAD_PROJECTS,
-        FILL_PROJECTS,
+        FILL_PROJECT,
+        FILL_PROJECT_ACTORS,
+        FILL_PROJECT_SCHEMA,
+        FILL_PROJECT_COMMENTS,
         LOAD_PROJECT,
         LOAD_PROJECT_SCHEMA,
         LOAD_PROJECT_ACTORS,
         LOAD_PROJECT_COMMENTS,
+        CREATE_MIGRATION_REPORT,
     }
 
     enum class Status {

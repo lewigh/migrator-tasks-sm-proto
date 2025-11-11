@@ -14,22 +14,29 @@ public class TaskController(
     private val taskDispatcher: TaskDispatcher
 ) {
 
+    private var started = false
+
     @GetMapping
     fun getAllTasks(): List<TaskDto> {
-        return repo.findAllByGoal(Task.Goal.MIGRATION)
+        return repo.findAllByGoal(Task.Goal.MIGRATE_PROJECT)
             .map { mapT(it) }
     }
 
     @Transactional
     @GetMapping("start")
     fun start() {
-        service.createMigration()
+        service.planNew(PlannedTask(Goal.MIGRATE_PROJECT, "Миграция проекта 1"))
     }
 
     @Transactional
     @GetMapping("next")
     fun next() {
-        service.planRound()
+        if (started) {
+            service.planRound()
+        } else {
+            start()
+            started = true
+        }
     }
 
     class TaskDto(
