@@ -8,6 +8,6 @@ import org.springframework.stereotype.Component
 class CreateMigrationReportExecutor(override val goal: Task.Goal = Task.Goal.CREATE_MIGRATION_REPORT) : TaskExecutor {
 
     override fun execute(current: CurrentTask, planner: TaskPlanner) {
-        println("Отчет о миграции проекта 1")
+        Thread.sleep(2_000)
     }
 }

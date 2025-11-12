@@ -19,7 +19,7 @@ data class PlannedTask(val goal: Task.Goal, val description: String)
 private const val READY_TO_PENDING: Int = 0;
 
 data class TaskPlanner(private val parent: Task, private var currentStage: Int = 0) {
-    fun stage(vararg tasks: PlannedTask): TaskPlanner {
+    fun parralel(vararg tasks: PlannedTask): TaskPlanner {
         if (tasks.isEmpty()) {
             return this;
         }

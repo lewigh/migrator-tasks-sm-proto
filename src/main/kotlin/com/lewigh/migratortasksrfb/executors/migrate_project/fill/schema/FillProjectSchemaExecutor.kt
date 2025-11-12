@@ -7,9 +7,7 @@ import org.springframework.stereotype.Component
 class FillProjectSchemaExecutor(override val goal: Task.Goal = Task.Goal.FILL_PROJECT_SCHEMA) : TaskExecutor {
 
     override fun execute(current: CurrentTask, planner: TaskPlanner) {
-        println("Загрузка схемы проекта")
         //throw RuntimeException("AAA")
-        //Thread.sleep(20_000)
-        println("Проект загружен")
+        Thread.sleep(8_000)
     }
 }

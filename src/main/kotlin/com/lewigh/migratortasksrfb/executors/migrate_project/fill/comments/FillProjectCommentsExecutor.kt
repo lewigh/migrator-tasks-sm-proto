@@ -7,9 +7,7 @@ import org.springframework.stereotype.Component
 class FillProjectCommentsExecutor(override val goal: Task.Goal = Task.Goal.FILL_PROJECT_COMMENTS) : TaskExecutor {
 
     override fun execute(current: CurrentTask, planner: TaskPlanner) {
-        println("Загрузка схемы проекта")
         //throw RuntimeException("AAA")
-        //Thread.sleep(20_000)
-        println("Проект загружен")
+        Thread.sleep(5_000)
     }
 }

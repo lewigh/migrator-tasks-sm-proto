@@ -1,55 +1,88 @@
 package com.lewigh.migratortasksrfb
 
 import com.lewigh.migratortasksrfb.Task.*
+import io.github.oshai.kotlinlogging.*
+import jakarta.persistence.*
+import org.springframework.data.repository.*
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.*
+import java.util.concurrent.*
 
 @Component
-class TaskDispatcher(val taskRepo: TaskRepository, val handlers: List<TaskExecutor>) {
+class TaskDispatcher(val repo: TaskRepository, val handlers: List<TaskExecutor>, private val executor: ExecutorService, val em: EntityManager, val tt: TransactionTemplate) {
+
+    private val logger = KotlinLogging.logger {}
 
     @Transactional
     fun planRound() {
-        for (task in taskRepo.findAllByStatusIs(Status.PENDING)) {
-            if (!task.executed) {
-                try {
-                    executeTask(task)
-                } catch (e: Exception) {
-                    task.error(e)
+        val tasks = repo.findAllByStatusIs(Status.PENDING)
+
+        val (plannables, executables) = tasks.partition { it.executed }
+
+        for (task in plannables) {
+            planTasks(task)
+        }
+
+        for (task in executables) {
+            executeInParralel(task)
+        }
+    }
+
+    private fun executeInParralel(task: Task) {
+        executor.submit {
+            try {
+
+                tt.executeWithoutResult {
+                    em.merge(task)
+                    task.run()
+                    logger.info { "Задача запущена: ${task.description}" }
+                    repo.save(task)
                 }
 
-            } else {
-                planTasks(task)
+                tt.executeWithoutResult {
+                    try {
+                        executeTask(requireNotNull(task.id))
+                    } catch (e: Exception) {
+                        logger.error(e) {}
+                        task.error(e)
+                    }
+                }
+            } catch (e: PersistenceException) {
+                logger.error(e) {}
+            } catch (e: Exception) {
+                logger.error(e) {}
+                throw e
             }
         }
     }
 
-    private fun executeTask(currentTask: Task) {
+    private fun executeTask(currentTaskId: Long) {
+        var currentTask = requireNotNull(repo.findByIdOrNull(currentTaskId))
         val executor = handlers.find { it.goal == currentTask.goal } ?: throw Exception()
-
-        currentTask.status = Status.RUNNING
-        currentTask.run()
-        taskRepo.flush()
 
         executor.execute(CurrentTask(currentTask.description), TaskPlanner(currentTask))
 
         currentTask.executed = true
 
         if (currentTask.subtasks.isEmpty()) {
-            currentTask.done()
+            currentTask.doneThenWakeUpParent()
+            logger.info { "Задача завершена: ${currentTask.description}" }
             return
         }
 
         for (subtask in currentTask.subtasks) {
-            taskRepo.save(subtask)
+            repo.save(subtask)
         }
 
         currentTask.waitTo()
+        repo.save(currentTask)
     }
 
     private fun planTasks(task: Task) {
 
         if (task.isAllSubtaskDone()) {
-            task.done()
+            task.doneThenWakeUpParent()
             return
         }
 
@@ -70,7 +103,7 @@ class TaskDispatcher(val taskRepo: TaskRepository, val handlers: List<TaskExecut
     fun planNew(planned: PlannedTask): Task {
         val migrationTask = Task(goal = planned.goal, status = Status.PENDING, description = planned.description)
 
-        return taskRepo.save(migrationTask)
+        return repo.save(migrationTask)
     }
 
 }

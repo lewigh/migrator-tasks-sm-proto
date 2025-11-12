@@ -33,7 +33,7 @@ class Task(
     fun isAnySubtaskFailured(): Boolean = subtasks.any { it.isError() || it.isCorrupted() }
     fun hasSubtasksToPlan(): Boolean = subtasks.all { it.status == Status.DONE || it.status == Status.WAITING }
 
-    fun done() {
+    fun doneThenWakeUpParent() {
         parent?.status = Status.PENDING
         status = Status.DONE
     }

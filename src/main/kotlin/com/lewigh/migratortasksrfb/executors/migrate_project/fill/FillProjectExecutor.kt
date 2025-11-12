@@ -8,12 +8,10 @@ import org.springframework.stereotype.Component
 class FillProjectExecutor(override val goal: Task.Goal = Task.Goal.FILL_PROJECT) : TaskExecutor {
 
     override fun execute(current: CurrentTask, planner: TaskPlanner) {
-        println("Постановка задач на выгрузку проектов")
-
-        planner.stage(
-            PlannedTask(goal = Goal.FILL_PROJECT_SCHEMA, description = "Загрузка схемы 1 проекта"),
-            PlannedTask(goal = Goal.FILL_PROJECT_ACTORS, description = "Загрузка акторов проекта"),
-            PlannedTask(goal = Goal.FILL_PROJECT_COMMENTS, description = "Загрузка комментариев проекта")
+        planner.parralel(
+            PlannedTask(goal = Goal.FILL_PROJECT_SCHEMA, description = "Выгрузка схем в Меркурий 1"),
+            PlannedTask(goal = Goal.FILL_PROJECT_ACTORS, description = "Выгрузка акторов в Меркурий 1"),
+            PlannedTask(goal = Goal.FILL_PROJECT_COMMENTS, description = "Выгрузка комментов в Меркурий 1")
         )
     }
 }

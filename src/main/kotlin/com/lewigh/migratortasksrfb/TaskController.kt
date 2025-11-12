@@ -25,7 +25,7 @@ public class TaskController(
     @Transactional
     @GetMapping("start")
     fun start() {
-        service.planNew(PlannedTask(Goal.MIGRATE_PROJECT, "Миграция проекта 1"))
+        service.planNew(PlannedTask(Goal.MIGRATE_PROJECT, "Миграция проекта Венера1 в Меркурий1"))
     }
 
     @Transactional
