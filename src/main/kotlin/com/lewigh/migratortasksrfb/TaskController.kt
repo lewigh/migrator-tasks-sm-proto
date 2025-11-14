@@ -4,33 +4,31 @@ import com.lewigh.migratortasksrfb.Task.*
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.*
 
 @RestController
 public class TaskController(
     val repo: TaskRepository,
     val service: TaskDispatcher,
-    private val error: View,
     private val taskDispatcher: TaskDispatcher
 ) {
 
     private var started = false
 
     @GetMapping
-    fun getAllTasks(): List<TaskDto> {
+    suspend fun getAllTasks(): List<TaskDto> {
         return repo.findAllByGoal(Task.Goal.MIGRATE_PROJECT)
             .map { mapT(it) }
     }
 
     @Transactional
     @GetMapping("start")
-    fun start() {
+    suspend fun start() {
         service.planNew(PlannedTask(Goal.MIGRATE_PROJECT, "Миграция проекта Венера1 в Меркурий1"))
     }
 
     @Transactional
     @GetMapping("next")
-    fun next() {
+    suspend fun next() {
         if (started) {
             service.planRound()
         } else {

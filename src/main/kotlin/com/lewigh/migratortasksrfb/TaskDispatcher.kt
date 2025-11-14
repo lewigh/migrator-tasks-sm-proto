@@ -2,20 +2,21 @@ package com.lewigh.migratortasksrfb
 
 import com.lewigh.migratortasksrfb.Task.*
 import io.github.oshai.kotlinlogging.*
-import jakarta.persistence.*
+import kotlinx.coroutines.reactor.*
 import org.springframework.data.repository.*
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.reactive.*
 import java.util.concurrent.*
 
 @Component
-class TaskDispatcher(val repo: TaskRepository, val handlers: List<TaskExecutor>, private val executor: ExecutorService, val txManager: TransactionalComponent) {
+class TaskDispatcher(val repo: TaskRepository, val handlers: List<TaskExecutor>, private val executor: ExecutorService, val f: TransactionalOperator) {
 
     private val logger = KotlinLogging.logger {}
 
     @Transactional
-    fun planRound() {
-        val tasks = repo.findAllByStatusIs(Status.PENDING)
+    suspend fun planRound() {
+        val tasks = repo.findAllByStatusIs(Status.PENDING).collectList().awaitSingle()
 
         val (plannables, executables) = tasks.partition { it.executed }
 
@@ -28,35 +29,32 @@ class TaskDispatcher(val repo: TaskRepository, val handlers: List<TaskExecutor>,
         }
     }
 
-    private fun executeInParralel(taskId: Long) {
-        executor.submit {
-            try {
-                txManager.executeWithoutResult {
-                    val task = requireNotNull(repo.findByIdOrNull(taskId))
+    private suspend fun executeInParralel(taskId: Long) {
+        try {
+            f.executeAndAwait {
+                val task = repo.findById(taskId) ?: throw RuntimeException()
 
-                    txManager.executeInSeparated {
-                        task.run()
-                        logger.info { "Задача запущена: ${task.description}" }
-                        repo.save(task)
-                    }
-
-                    try {
-                        executeTask(task)
-                    } catch (e: Exception) {
-                        logger.error(e) {}
-                        task.error(e)
-                    }
+                f.executeAndAwait {
+                    task.run()
+                    logger.info { "Задача запущена: ${task.description}" }
+                    repo.save(task)
                 }
-            } catch (e: PersistenceException) {
-                logger.error(e) {}
-            } catch (e: Exception) {
-                logger.error(e) {}
-                throw e
+
+                try {
+                    executeTask(task)
+                } catch (e: Exception) {
+                    logger.error(e) {}
+                    task.error(e)
+                }
             }
+        } catch (e: Exception) {
+            logger.error(e) {}
+            throw e
         }
+
     }
 
-    private fun executeTask(currentTask: Task) {
+    private suspend fun executeTask(currentTask: Task) {
 
         val executor = handlers.find { it.goal == currentTask.goal } ?: throw Exception()
 
@@ -78,7 +76,7 @@ class TaskDispatcher(val repo: TaskRepository, val handlers: List<TaskExecutor>,
         repo.save(currentTask)
     }
 
-    private fun planTasks(task: Task) {
+    private suspend fun planTasks(task: Task) {
 
         if (task.isAllSubtaskDone()) {
             task.doneThenWakeUpParent()
@@ -99,7 +97,7 @@ class TaskDispatcher(val repo: TaskRepository, val handlers: List<TaskExecutor>,
 
 
     @Transactional
-    fun planNew(planned: PlannedTask): Task {
+    suspend fun planNew(planned: PlannedTask): Task {
         val migrationTask = Task(goal = planned.goal, status = Status.PENDING, description = planned.description)
 
         return repo.save(migrationTask)

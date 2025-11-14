@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: migrator-tasks-sm-proto
+  datasource:
+    url: jdbc:postgresql://localhost:5432/local-db
+    username: local
+    password: local
+    driver-class-name: org.postgresql.Driver
+  liquibase:
+    enabled: true
+    change-log: classpath:changelog/changelog.yml
+    contexts: production, test
+    liquibase-schema: public
+    url: jdbc:postgresql://localhost:5432/local-db
+    user: local
+    password: local
+    drop-first: true
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/local-db
+    username: local
+    password: local
+#logging:
+#  level:
+#    liquibase: DEBUG
+#    org.springframework.boot.autoconfigure.liquibase: DEBUG

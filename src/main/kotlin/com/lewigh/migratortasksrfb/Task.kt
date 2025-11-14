@@ -1,22 +1,18 @@
 package com.lewigh.migratortasksrfb
 
-import jakarta.persistence.*
+import org.springframework.data.annotation.*
+import org.springframework.data.relational.core.mapping.*
+
 
 @Table(name = "task")
-@Entity()
 class Task(
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
     var description: String,
-    @JoinColumn(name = "parent_id")
-    @ManyToOne(fetch = FetchType.LAZY)
     var parent: Task? = null,
     var goal: Goal,
     var params: String? = null,
-    @Lob
     var error: String? = null,
-    @OneToMany(mappedBy = "parent")
     var subtasks: MutableList<Task> = mutableListOf(),
     var status: Status,
     var stage: Int = 0,

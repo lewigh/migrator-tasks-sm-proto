@@ -1,6 +1,7 @@
 package com.lewigh.migratortasksrfb
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.context.properties.*
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.*
 import org.springframework.scheduling.annotation.EnableScheduling
@@ -14,6 +15,8 @@ class MigratorTasksRfbApplication {
     fun taskExecutor(): ExecutorService {
         return Executors.newFixedThreadPool(100)
     }
+
+
 }
 
 fun main(args: Array<String>) {

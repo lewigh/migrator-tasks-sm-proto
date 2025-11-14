@@ -1,14 +1,15 @@
 package com.lewigh.migratortasksrfb
 
-import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.repository.kotlin.*
 import org.springframework.stereotype.Repository
+import reactor.core.publisher.*
 
 @Repository
-interface TaskRepository : JpaRepository<Task, Long> {
+interface TaskRepository : CoroutineCrudRepository<Task, Long> {
 
-    fun findAllByGoal(goal: Task.Goal): List<Task>
+    suspend fun findAllByGoal(goal: Task.Goal): List<Task>
 
-    fun findAllByParentIdIs(parentId: Long): List<Task>
+    suspend fun findAllByParentIdIs(parentId: Long): List<Task>
 
-    fun findAllByStatusIs(status: Task.Status): List<Task>
+    suspend fun findAllByStatusIs(status: Task.Status): Flux<Task>
 }

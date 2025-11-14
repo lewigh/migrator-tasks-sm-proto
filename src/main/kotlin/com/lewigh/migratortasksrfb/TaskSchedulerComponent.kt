@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 class TaskSchedulerComponent(val service: TaskDispatcher) {
 
     @Scheduled(fixedRate = 5000)
-    fun handle() {
+    suspend fun handle() {
         service.planRound()
     }
 }
