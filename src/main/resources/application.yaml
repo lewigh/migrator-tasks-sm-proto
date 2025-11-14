@@ -14,7 +14,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/local-db
     user: local
     password: local
-    drop-first: true
+    drop-first: false
   r2dbc:
     url: r2dbc:postgresql://localhost:5432/local-db
     username: local

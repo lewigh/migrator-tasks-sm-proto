@@ -4,15 +4,18 @@ import org.springframework.data.annotation.*
 import org.springframework.data.relational.core.mapping.*
 
 
-@Table(name = "task")
+
+@Table(name = "task", schema = "core")
 class Task(
     @Id
     var id: Long? = null,
     var description: String,
+    @Transient
     var parent: Task? = null,
     var goal: Goal,
     var params: String? = null,
     var error: String? = null,
+    @Transient
     var subtasks: MutableList<Task> = mutableListOf(),
     var status: Status,
     var stage: Int = 0,
