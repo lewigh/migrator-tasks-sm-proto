@@ -8,6 +8,6 @@ class LoadProjectActorsExecutor(override val goal: Task.Goal = Task.Goal.LOAD_PR
 
     override fun execute(current: CurrentTask, planner: TaskPlanner) {
         //throw RuntimeException("AAA")
-        Thread.sleep(15_000)
+        Thread.sleep(5_000)
     }
 }

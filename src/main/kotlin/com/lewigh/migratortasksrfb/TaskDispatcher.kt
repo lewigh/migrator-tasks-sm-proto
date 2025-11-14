@@ -6,11 +6,10 @@ import jakarta.persistence.*
 import org.springframework.data.repository.*
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.transaction.support.*
 import java.util.concurrent.*
 
 @Component
-class TaskDispatcher(val repo: TaskRepository, val handlers: List<TaskExecutor>, private val executor: ExecutorService, val em: EntityManager, val tt: TransactionTemplate) {
+class TaskDispatcher(val repo: TaskRepository, val handlers: List<TaskExecutor>, private val executor: ExecutorService, val txManager: TransactionalComponent) {
 
     private val logger = KotlinLogging.logger {}
 
@@ -25,24 +24,24 @@ class TaskDispatcher(val repo: TaskRepository, val handlers: List<TaskExecutor>,
         }
 
         for (task in executables) {
-            executeInParralel(task)
+            executeInParralel(requireNotNull(task.id))
         }
     }
 
-    private fun executeInParralel(task: Task) {
+    private fun executeInParralel(taskId: Long) {
         executor.submit {
             try {
+                txManager.executeWithoutResult {
+                    val task = requireNotNull(repo.findByIdOrNull(taskId))
 
-                tt.executeWithoutResult {
-                    em.merge(task)
-                    task.run()
-                    logger.info { "Задача запущена: ${task.description}" }
-                    repo.save(task)
-                }
+                    txManager.executeInSeparated {
+                        task.run()
+                        logger.info { "Задача запущена: ${task.description}" }
+                        repo.save(task)
+                    }
 
-                tt.executeWithoutResult {
                     try {
-                        executeTask(requireNotNull(task.id))
+                        executeTask(task)
                     } catch (e: Exception) {
                         logger.error(e) {}
                         task.error(e)
@@ -57,8 +56,8 @@ class TaskDispatcher(val repo: TaskRepository, val handlers: List<TaskExecutor>,
         }
     }
 
-    private fun executeTask(currentTaskId: Long) {
-        var currentTask = requireNotNull(repo.findByIdOrNull(currentTaskId))
+    private fun executeTask(currentTask: Task) {
+
         val executor = handlers.find { it.goal == currentTask.goal } ?: throw Exception()
 
         executor.execute(CurrentTask(currentTask.description), TaskPlanner(currentTask))

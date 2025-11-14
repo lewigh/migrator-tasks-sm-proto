@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 class LoadProjectCommentsExecutor(override val goal: Task.Goal = Task.Goal.LOAD_PROJECT_COMMENTS) : TaskExecutor {
 
     override fun execute(current: CurrentTask, planner: TaskPlanner) {
-        //throw RuntimeException("AAA")
-        Thread.sleep(5_000)
+        throw RuntimeException("Венера не отвечает!")
+        //Thread.sleep(5_000)
     }
 }

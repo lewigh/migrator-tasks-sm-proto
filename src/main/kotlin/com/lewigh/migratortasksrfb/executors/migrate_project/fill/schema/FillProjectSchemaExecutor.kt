@@ -8,6 +8,6 @@ class FillProjectSchemaExecutor(override val goal: Task.Goal = Task.Goal.FILL_PR
 
     override fun execute(current: CurrentTask, planner: TaskPlanner) {
         //throw RuntimeException("AAA")
-        Thread.sleep(8_000)
+        Thread.sleep(2_000)
     }
 }
