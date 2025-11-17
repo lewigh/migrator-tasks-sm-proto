@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 class LoadProjectActorsExecutor(override val goal: TaskGoal = TaskGoal.LOAD_PROJECT_ACTORS_BATCH, private val objectMapper: ObjectMapper) : TaskProcessor {
 
     override fun process(current: CurrentTask, planner: TaskPlanner) {
-        val value = current.parameters as? PageModel
+        val value = current.parameters as PageModel
 
         println("Получены параметры ${value}")
         Thread.sleep(5_000)

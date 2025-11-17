@@ -9,20 +9,20 @@ class Task(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
-    var title: String,
     @JoinColumn(name = "parent_id")
     @ManyToOne(fetch = FetchType.LAZY)
     var parent: Task? = null,
+    var domainId: String?,
+    var title: String,
     var goal: TaskGoal,
+    var status: Status,
+    var executed: Boolean = false,
+    var stage: Int = 0,
     var params: String?,
     @Lob
     var error: String? = null,
     @OneToMany(mappedBy = "parent")
-    var subtasks: MutableList<Task> = mutableListOf(),
-    var status: Status,
-    var stage: Int = 0,
-    var executed: Boolean = false,
-    var domainId: String?
+    var subtasks: MutableList<Task> = mutableListOf()
 ) {
 
     fun isRunning(): Boolean = status == Status.RUNNING

@@ -52,7 +52,7 @@ class TaskDispatcher(
 
                     txManager.withNew {
                         task.run()
-                        logger.info { "Задача запущена: ${task.title}" }
+                        onTaskRun(task)
                         repo.save(task)
                     }
 
@@ -92,7 +92,7 @@ class TaskDispatcher(
 
         if (currentTask.subtasks.isEmpty()) {
             currentTask.doneThenWakeUpParent()
-            logger.info { "Задача завершена: ${currentTask.title}" }
+            onTaskCompleted(currentTask)
             return
         }
 
@@ -162,10 +162,18 @@ class TaskDispatcher(
 
     private fun validate(task: PlannedTask, newSubtask: Task, parent: Task) {
         if (parent.goal == task.goal) {
-            val message = "Couldn't plan child task with the same goal as parent. Parent: ${parent.goal} child $task"
+            val message = "Failed task: Couldn't plan child task with the same goal as parent. Parent: ${parent.goal} child $task"
             logger.error { message }
             newSubtask.error(message)
         }
+    }
+
+    private fun onTaskRun(task: Task) {
+        logger.info { "Started task: ${task.title}" }
+    }
+
+    private fun onTaskCompleted(task: Task) {
+        logger.info { "Completed task: ${task.title}" }
     }
 
 }
