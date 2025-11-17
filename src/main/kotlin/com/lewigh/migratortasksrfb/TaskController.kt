@@ -1,6 +1,8 @@
 package com.lewigh.migratortasksrfb;
 
-import com.lewigh.migratortasksrfb.Task.*
+import com.lewigh.migratortasksrfb.engine.*
+import com.lewigh.migratortasksrfb.engine.internal.Task.*
+import com.lewigh.migratortasksrfb.engine.internal.*
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController;
@@ -18,14 +20,14 @@ public class TaskController(
 
     @GetMapping
     fun getAllTasks(): List<TaskDto> {
-        return repo.findAllByGoal(Task.Goal.MIGRATE_PROJECT)
+        return repo.findAllByGoal(Goal.PROJECT_MIGRATE)
             .map { mapT(it) }
     }
 
     @Transactional
     @GetMapping("start")
     fun start() {
-        service.planNew(PlannedTask(Goal.MIGRATE_PROJECT, "Миграция проекта Венера1 в Меркурий1"))
+        service.planNew(PlannedTask(Goal.PROJECT_MIGRATE, "Миграция проекта Венера1 в Меркурий1", domainId = "0f60fc70-2d7b-4f2d-8254-fd3e7db09cd9"))
     }
 
     @Transactional
@@ -47,8 +49,10 @@ public class TaskController(
         var status: Status,
         var stage: Int,
         var executed: Boolean,
+        var params: String?,
+        var domainId: String?,
         var error: String?,
-        var subtasks: MutableList<TaskDto>
+        var subtasks: MutableList<TaskDto>,
     )
 
     fun mapT(task: Task): TaskDto {
@@ -61,7 +65,9 @@ public class TaskController(
             stage = task.stage,
             executed = task.executed,
             subtasks = task.subtasks.map { mapT(it) }.toMutableList(),
-            error = task.error
+            error = task.error,
+            domainId = task.domainId,
+            params = task.params
         )
     }
 }

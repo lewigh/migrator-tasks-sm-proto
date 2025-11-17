@@ -5,15 +5,13 @@ import org.springframework.transaction.*
 import org.springframework.transaction.support.*
 
 @Component
-public class TransactionalComponent(private val txManager: PlatformTransactionManager) {
+public class TransactionalComponent(private val txManager: PlatformTransactionManager, private val transactionTemplate: TransactionTemplate) {
 
-    fun executeWithoutResult(operation: () -> Unit) {
-        val tx = TransactionTemplate(txManager)
-        tx.propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRED
-        tx.executeWithoutResult { operation() }
+    fun with(operation: () -> Unit) {
+        transactionTemplate.executeWithoutResult { operation() }
     }
 
-    fun executeInSeparated(operation: () -> Unit) {
+    fun withNew(operation: () -> Unit) {
         val tx = TransactionTemplate(txManager)
         tx.propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRES_NEW
         tx.executeWithoutResult { operation() }

@@ -1,5 +1,6 @@
-package com.lewigh.migratortasksrfb
+package com.lewigh.migratortasksrfb.engine.internal
 
+import com.lewigh.migratortasksrfb.engine.*
 import jakarta.persistence.*
 
 @Table(name = "task")
@@ -13,7 +14,7 @@ class Task(
     @ManyToOne(fetch = FetchType.LAZY)
     var parent: Task? = null,
     var goal: Goal,
-    var params: String? = null,
+    var params: String?,
     @Lob
     var error: String? = null,
     @OneToMany(mappedBy = "parent")
@@ -21,6 +22,7 @@ class Task(
     var status: Status,
     var stage: Int = 0,
     var executed: Boolean = false,
+    var domainId: String?
 ) {
 
     fun isRunning(): Boolean = status == Status.RUNNING
@@ -81,20 +83,6 @@ class Task(
             .toSortedMap()
             .firstEntry().value
             .forEach { it.pending() }
-    }
-
-    enum class Goal {
-        MIGRATE_PROJECT,
-        LOAD_PROJECTS,
-        FILL_PROJECT,
-        FILL_PROJECT_ACTORS,
-        FILL_PROJECT_SCHEMA,
-        FILL_PROJECT_COMMENTS,
-        LOAD_PROJECT,
-        LOAD_PROJECT_SCHEMA,
-        LOAD_PROJECT_ACTORS,
-        LOAD_PROJECT_COMMENTS,
-        CREATE_MIGRATION_REPORT,
     }
 
     enum class Status {

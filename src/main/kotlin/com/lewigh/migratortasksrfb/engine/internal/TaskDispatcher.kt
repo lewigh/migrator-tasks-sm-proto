@@ -1,6 +1,8 @@
-package com.lewigh.migratortasksrfb
+package com.lewigh.migratortasksrfb.engine.internal
 
-import com.lewigh.migratortasksrfb.Task.*
+import com.lewigh.migratortasksrfb.*
+import com.lewigh.migratortasksrfb.engine.*
+import com.lewigh.migratortasksrfb.engine.internal.Task.*
 import io.github.oshai.kotlinlogging.*
 import jakarta.persistence.*
 import org.springframework.data.repository.*
@@ -9,7 +11,9 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.concurrent.*
 
 @Component
-class TaskDispatcher(val repo: TaskRepository, val handlers: List<TaskExecutor>, private val executor: ExecutorService, val txManager: TransactionalComponent) {
+class TaskDispatcher(
+    val repo: TaskRepository, val handlers: List<TaskProcessor>, private val executor: ExecutorService, val txManager: TransactionalComponent
+) {
 
     private val logger = KotlinLogging.logger {}
 
@@ -31,10 +35,10 @@ class TaskDispatcher(val repo: TaskRepository, val handlers: List<TaskExecutor>,
     private fun executeInParralel(taskId: Long) {
         executor.submit {
             try {
-                txManager.executeWithoutResult {
+                txManager.with {
                     val task = requireNotNull(repo.findByIdOrNull(taskId))
 
-                    txManager.executeInSeparated {
+                    txManager.withNew {
                         task.run()
                         logger.info { "Задача запущена: ${task.description}" }
                         repo.save(task)
@@ -60,7 +64,7 @@ class TaskDispatcher(val repo: TaskRepository, val handlers: List<TaskExecutor>,
 
         val executor = handlers.find { it.goal == currentTask.goal } ?: throw Exception()
 
-        executor.execute(CurrentTask(currentTask.description), TaskPlanner(currentTask))
+        executor.process(CurrentTask(currentTask.description, currentTask.params, currentTask.domainId), TaskPlanner(currentTask))
 
         currentTask.executed = true
 
@@ -100,7 +104,13 @@ class TaskDispatcher(val repo: TaskRepository, val handlers: List<TaskExecutor>,
 
     @Transactional
     fun planNew(planned: PlannedTask): Task {
-        val migrationTask = Task(goal = planned.goal, status = Status.PENDING, description = planned.description)
+        val migrationTask = Task(
+            goal = planned.goal,
+            status = Status.PENDING,
+            description = planned.description,
+            params = planned.parameters,
+            domainId = planned.domainId,
+        )
 
         return repo.save(migrationTask)
     }

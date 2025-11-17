@@ -1,12 +1,13 @@
-package com.lewigh.migratortasksrfb
+package com.lewigh.migratortasksrfb.engine.internal
 
+import com.lewigh.migratortasksrfb.engine.*
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
 interface TaskRepository : JpaRepository<Task, Long> {
 
-    fun findAllByGoal(goal: Task.Goal): List<Task>
+    fun findAllByGoal(goal: Goal): List<Task>
 
     fun findAllByParentIdIs(parentId: Long): List<Task>
 

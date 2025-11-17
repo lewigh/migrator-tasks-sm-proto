@@ -1,13 +1,14 @@
-package com.lewigh.migratortasksrfb.executors.migrate_project.load
+package com.lewigh.migratortasksrfb.processor.migrate_project.load
 
-import com.lewigh.migratortasksrfb.*
-import com.lewigh.migratortasksrfb.Task.*
+import com.lewigh.migratortasksrfb.engine.*
+import com.lewigh.migratortasksrfb.engine.internal.*
+import com.lewigh.migratortasksrfb.engine.internal.Task.*
 import org.springframework.stereotype.Component
 
 @Component
-class LoadProjectExecutor(override val goal: Task.Goal = Task.Goal.LOAD_PROJECT) : TaskExecutor {
+class LoadProjectExecutor(override val goal: Goal = Goal.LOAD_PROJECT) : TaskProcessor {
 
-    override fun execute(current: CurrentTask, planner: TaskPlanner) {
+    override fun process(current: CurrentTask, planner: TaskPlanner) {
         planner.parralel(
             PlannedTask(goal = Goal.LOAD_PROJECT_SCHEMA, description = "Загрузка схем из Венера1"),
             PlannedTask(goal = Goal.LOAD_PROJECT_ACTORS, description = "Загрузка акторов из Венера1"),
