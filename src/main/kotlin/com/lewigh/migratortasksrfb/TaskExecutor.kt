@@ -1,6 +1,7 @@
 package com.lewigh.migratortasksrfb
 
 import com.lewigh.migratortasksrfb.Task.*
+import java.util.*
 
 interface TaskExecutor {
 
@@ -18,7 +19,7 @@ data class PlannedTask(val goal: Task.Goal, val description: String)
 
 private const val READY_TO_PENDING: Int = 0;
 
-data class TaskPlanner(private val parent: Task, private var currentStage: Int = 0) {
+data class TaskPlanner(private val parent: Task, private val subtasks: MutableList<Task>, private var currentStage: Int = 0) {
     fun parralel(vararg tasks: PlannedTask): TaskPlanner {
         if (tasks.isEmpty()) {
             return this;
@@ -36,9 +37,9 @@ data class TaskPlanner(private val parent: Task, private var currentStage: Int =
                 goal = task.goal,
                 status = plannedStatus,
                 stage = currentStage,
-                parent = parent
+                parentId = parent.id
             )
-            parent.subtasks.add(newSubtask)
+            subtasks.add(newSubtask)
         }
 
         currentStage++

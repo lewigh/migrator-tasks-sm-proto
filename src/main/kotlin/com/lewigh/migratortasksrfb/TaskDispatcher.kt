@@ -58,17 +58,19 @@ class TaskDispatcher(val repo: TaskRepository, val handlers: List<TaskExecutor>,
 
         val executor = handlers.find { it.goal == currentTask.goal } ?: throw Exception()
 
-        executor.execute(CurrentTask(currentTask.description), TaskPlanner(currentTask))
+        var subtasks = mutableListOf<Task>()
+
+        executor.execute(CurrentTask(currentTask.description), TaskPlanner(currentTask, subtasks))
 
         currentTask.executed = true
 
-        if (currentTask.subtasks.isEmpty()) {
+        if (subtasks.isEmpty()) {
             currentTask.doneThenWakeUpParent()
             logger.info { "Задача завершена: ${currentTask.description}" }
             return
         }
 
-        for (subtask in currentTask.subtasks) {
+        for (subtask in subtasks) {
             repo.save(subtask)
         }
 

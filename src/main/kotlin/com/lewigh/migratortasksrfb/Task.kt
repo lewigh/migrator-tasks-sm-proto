@@ -4,19 +4,15 @@ import org.springframework.data.annotation.*
 import org.springframework.data.relational.core.mapping.*
 
 
-
 @Table(name = "task", schema = "core")
 class Task(
     @Id
     var id: Long? = null,
     var description: String,
-    @Transient
-    var parent: Task? = null,
+    var parentId: Long? = null,
     var goal: Goal,
     var params: String? = null,
     var error: String? = null,
-    @Transient
-    var subtasks: MutableList<Task> = mutableListOf(),
     var status: Status,
     var stage: Int = 0,
     var executed: Boolean = false,
@@ -28,12 +24,12 @@ class Task(
     fun isError(): Boolean = status == Status.ERROR
     fun isWaiting(): Boolean = status == Status.WAITING
     fun isCorrupted(): Boolean = status == Status.CORRUPTED
-    fun isAllSubtaskDone(): Boolean = subtasks.all { it.isDone() }
-    fun isAnySubtaskFailured(): Boolean = subtasks.any { it.isError() || it.isCorrupted() }
-    fun hasSubtasksToPlan(): Boolean = subtasks.all { it.status == Status.DONE || it.status == Status.WAITING }
+    fun isAllSubtaskDone(subtasks: List<Task>): Boolean = subtasks.all { it.isDone() }
+    fun isAnySubtaskFailured(subtasks: List<Task>): Boolean = subtasks.any { it.isError() || it.isCorrupted() }
+    fun hasSubtasksToPlan(subtasks: List<Task>): Boolean = subtasks.all { it.status == Status.DONE || it.status == Status.WAITING }
 
     fun doneThenWakeUpParent() {
-        parent?.status = Status.PENDING
+        //FIXME parentId?.status = Status.PENDING
         status = Status.DONE
     }
 
@@ -70,10 +66,10 @@ class Task(
     fun error(text: String) {
         status = Status.ERROR
         error = text
-        parent?.status = Status.PENDING
+        //FIXME parentId?.status = Status.PENDING
     }
 
-    fun planNextStageWaitingTasks() {
+    fun planNextStageWaitingTasks(subtasks: List<Task>) {
         subtasks.asSequence()
             .filter { it.isWaiting() }
             .groupBy { it.stage }

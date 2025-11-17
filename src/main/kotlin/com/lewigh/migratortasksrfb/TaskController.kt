@@ -52,7 +52,7 @@ public class TaskController(
     fun mapT(task: Task): TaskDto {
         return TaskDto(
             id = requireNotNull(task.id),
-            parentId = task.parent?.id,
+            parentId = task.parentId,
             goal = task.goal,
             status = task.status,
             description = task.description,
