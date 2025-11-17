@@ -4,10 +4,11 @@ import com.lewigh.migratortasksrfb.engine.internal.*
 
 interface TaskProcessor {
 
-    val goal: Goal
+    val goal: TaskGoal
 
     fun process(current: CurrentTask, planner: TaskPlanner)
 
     fun rollback(current: CurrentTask) {
+        // по умолчанию не предусмотрено
     }
 }

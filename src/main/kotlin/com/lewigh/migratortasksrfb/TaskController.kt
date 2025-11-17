@@ -20,37 +20,37 @@ public class TaskController(
 
     @GetMapping
     fun getAllTasks(): List<TaskDto> {
-        return repo.findAllByGoal(Goal.PROJECT_MIGRATE)
+        return repo.findAllByGoal(TaskGoal.PROJECT_MIGRATE)
             .map { mapT(it) }
     }
 
     @Transactional
     @GetMapping("start")
     fun start() {
-        service.planNew(PlannedTask(Goal.PROJECT_MIGRATE, "Миграция проекта Венера1 в Меркурий1", domainId = "0f60fc70-2d7b-4f2d-8254-fd3e7db09cd9"))
+        service.planNewTask(PlannedTask(TaskGoal.PROJECT_MIGRATE, "Миграция проекта Венера1 в Меркурий1", domainId = "0f60fc70-2d7b-4f2d-8254-fd3e7db09cd9"))
     }
 
     @Transactional
     @GetMapping("next")
     fun next() {
         if (started) {
-            service.planRound()
+            service.dispatchRound()
         } else {
             start()
             started = true
         }
     }
 
-    class TaskDto(
+    data class TaskDto(
         var id: Long,
-        var description: String,
-        var parentId: Long?,
-        var goal: Goal,
+        var title: String,
         var status: Status,
+        var goal: TaskGoal,
+        var parentId: Long?,
+        var domainId: String?,
         var stage: Int,
         var executed: Boolean,
         var params: String?,
-        var domainId: String?,
         var error: String?,
         var subtasks: MutableList<TaskDto>,
     )
@@ -61,7 +61,7 @@ public class TaskController(
             parentId = task.parent?.id,
             goal = task.goal,
             status = task.status,
-            description = task.description,
+            title = task.title,
             stage = task.stage,
             executed = task.executed,
             subtasks = task.subtasks.map { mapT(it) }.toMutableList(),

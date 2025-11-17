@@ -13,13 +13,24 @@ import java.util.concurrent.*
 
 @Component
 class TaskDispatcher(
-    val repo: TaskRepository, val handlers: List<TaskProcessor>, private val executor: ExecutorService, val txManager: TransactionalComponent, private val objectMapper: ObjectMapper
+    private val repo: TaskRepository,
+    private val processors: List<TaskProcessor>,
+    private val executor: ExecutorService,
+    private val txManager: TransactionalComponent,
+    private val objectMapper: ObjectMapper
 ) {
 
     private val logger = KotlinLogging.logger {}
 
     @Transactional
-    fun planRound() {
+    fun planNewTask(planned: PlannedTask): Task {
+        val migrationTask = plannedTaskToTask(planned, Status.PENDING, null)
+
+        return repo.save(migrationTask)
+    }
+
+    @Transactional
+    fun dispatchRound() {
         val tasks = repo.findAllByStatusIs(Status.PENDING)
 
         val (plannables, executables) = tasks.partition { it.executed }
@@ -41,7 +52,7 @@ class TaskDispatcher(
 
                     txManager.withNew {
                         task.run()
-                        logger.info { "Задача запущена: ${task.description}" }
+                        logger.info { "Задача запущена: ${task.title}" }
                         repo.save(task)
                     }
 
@@ -63,7 +74,7 @@ class TaskDispatcher(
 
     private fun executeTask(currentTask: Task) {
 
-        val executor = handlers.find { it.goal == currentTask.goal } ?: throw Exception()
+        val processor = processors.find { it.goal == currentTask.goal } ?: throw Exception()
 
         val params = if (currentTask.params != null) {
             objectMapper.readValue(currentTask.params, Any::class.java)
@@ -71,13 +82,17 @@ class TaskDispatcher(
             null
         }
 
-        executor.process(CurrentTask(currentTask.description, params, currentTask.domainId), TaskPlanner(currentTask, objectMapper = objectMapper))
+        val plannedTasksBuffer = mutableListOf<PlannedTask>();
+
+        processor.process(CurrentTask(currentTask.title, params, currentTask.domainId), TaskPlanner(plannedTasksBuffer))
+
+        currentTask.subtasks = plannedTasksToTasks(plannedTasksBuffer, currentTask)
 
         currentTask.executed = true
 
         if (currentTask.subtasks.isEmpty()) {
             currentTask.doneThenWakeUpParent()
-            logger.info { "Задача завершена: ${currentTask.description}" }
+            logger.info { "Задача завершена: ${currentTask.title}" }
             return
         }
 
@@ -109,17 +124,48 @@ class TaskDispatcher(
     }
 
 
-    @Transactional
-    fun planNew(planned: PlannedTask): Task {
-        val migrationTask = Task(
-            goal = planned.goal,
-            status = Status.PENDING,
-            description = planned.description,
-            params = objectMapper.writeValueAsString(planned.parameters),
-            domainId = planned.domainId,
-        )
+    private fun plannedTasksToTasks(tasks: List<PlannedTask>, parent: Task): MutableList<Task> {
 
-        return repo.save(migrationTask)
+        val subtasks = mutableListOf<Task>();
+
+        for (task in tasks) {
+
+            var plannedStatus = if (task.stage == READY_TO_PENDING) {
+                Task.Status.PENDING
+            } else {
+                Task.Status.WAITING
+            }
+
+            val newSubtask = plannedTaskToTask(task, plannedStatus, parent)
+
+            subtasks.add(newSubtask)
+
+            validate(task, newSubtask, parent)
+        }
+
+        return subtasks
+    }
+
+    private fun plannedTaskToTask(
+        plannedTask: PlannedTask,
+        plannedStatus: Status,
+        parent: Task?,
+    ) = Task(
+        title = plannedTask.title,
+        goal = plannedTask.goal,
+        status = plannedStatus,
+        stage = plannedTask.stage,
+        parent = parent,
+        domainId = plannedTask.domainId ?: parent?.domainId,
+        params = plannedTask.parameters?.let { objectMapper.writeValueAsString(it) },
+    )
+
+    private fun validate(task: PlannedTask, newSubtask: Task, parent: Task) {
+        if (parent.goal == task.goal) {
+            val message = "Couldn't plan child task with the same goal as parent. Parent: ${parent.goal} child $task"
+            logger.error { message }
+            newSubtask.error(message)
+        }
     }
 
 }

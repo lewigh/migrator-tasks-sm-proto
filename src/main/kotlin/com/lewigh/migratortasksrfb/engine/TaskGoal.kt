@@ -1,6 +1,6 @@
 package com.lewigh.migratortasksrfb.engine
 
-enum class Goal {
+enum class TaskGoal {
         PROJECT_MIGRATE,
         PROJECT_FILL,
         FILL_PROJECT_ACTORS,

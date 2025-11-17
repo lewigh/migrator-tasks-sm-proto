@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository
 @Repository
 interface TaskRepository : JpaRepository<Task, Long> {
 
-    fun findAllByGoal(goal: Goal): List<Task>
+    fun findAllByGoal(goal: TaskGoal): List<Task>
 
     fun findAllByParentIdIs(parentId: Long): List<Task>
 

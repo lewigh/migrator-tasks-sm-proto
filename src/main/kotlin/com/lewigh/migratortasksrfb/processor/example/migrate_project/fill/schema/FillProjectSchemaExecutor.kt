@@ -1,11 +1,11 @@
-package com.lewigh.migratortasksrfb.processor.migrate_project.fill.schema
+package com.lewigh.migratortasksrfb.processor.example.migrate_project.fill.schema
 
 import com.lewigh.migratortasksrfb.engine.*
 import com.lewigh.migratortasksrfb.engine.internal.*
 import org.springframework.stereotype.Component
 
 @Component
-class FillProjectSchemaExecutor(override val goal: Goal = Goal.FILL_PROJECT_SCHEMA) : TaskProcessor {
+class FillProjectSchemaExecutor(override val goal: TaskGoal = TaskGoal.FILL_PROJECT_SCHEMA) : TaskProcessor {
 
     override fun process(current: CurrentTask, planner: TaskPlanner) {
         //throw RuntimeException("AAA")

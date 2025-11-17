@@ -1,13 +1,11 @@
-package com.lewigh.migratortasksrfb.processor.migrate_project.load.comments
+package com.lewigh.migratortasksrfb.processor.example.migrate_project.load.comments
 
-import com.fasterxml.jackson.databind.*
 import com.lewigh.migratortasksrfb.engine.*
 import com.lewigh.migratortasksrfb.engine.internal.*
-import com.lewigh.migratortasksrfb.processor.migrate_project.*
 import org.springframework.stereotype.Component
 
 @Component
-class LoadProjectCommentsExecutor(override val goal: Goal = Goal.LOAD_PROJECT_COMMENTS) : TaskProcessor {
+class LoadProjectCommentsExecutor(override val goal: TaskGoal = TaskGoal.LOAD_PROJECT_COMMENTS) : TaskProcessor {
 
     override fun process(current: CurrentTask, planner: TaskPlanner) {
 

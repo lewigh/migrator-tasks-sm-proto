@@ -9,11 +9,11 @@ class Task(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
-    var description: String,
+    var title: String,
     @JoinColumn(name = "parent_id")
     @ManyToOne(fetch = FetchType.LAZY)
     var parent: Task? = null,
-    var goal: Goal,
+    var goal: TaskGoal,
     var params: String?,
     @Lob
     var error: String? = null,

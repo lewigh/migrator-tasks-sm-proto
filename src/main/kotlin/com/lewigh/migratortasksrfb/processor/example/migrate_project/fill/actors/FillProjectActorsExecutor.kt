@@ -1,14 +1,14 @@
-package com.lewigh.migratortasksrfb.processor.migrate_project.load.schema
+package com.lewigh.migratortasksrfb.processor.example.migrate_project.fill.actors
 
 import com.lewigh.migratortasksrfb.engine.*
 import com.lewigh.migratortasksrfb.engine.internal.*
 import org.springframework.stereotype.Component
 
 @Component
-class LoadProjectSchemaExecutor(override val goal: Goal = Goal.LOAD_PROJECT_SCHEMA) : TaskProcessor {
+class FillProjectActorsExecutor(override val goal: TaskGoal = TaskGoal.FILL_PROJECT_ACTORS) : TaskProcessor {
 
     override fun process(current: CurrentTask, planner: TaskPlanner) {
         //throw RuntimeException("AAA")
-        Thread.sleep(1_000)
+        Thread.sleep(3_000)
     }
 }
