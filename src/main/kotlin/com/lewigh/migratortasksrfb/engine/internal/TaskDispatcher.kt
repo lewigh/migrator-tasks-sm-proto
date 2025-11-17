@@ -1,6 +1,8 @@
 package com.lewigh.migratortasksrfb.engine.internal
 
+import com.fasterxml.jackson.core.type.*
 import com.fasterxml.jackson.databind.*
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.lewigh.migratortasksrfb.*
 import com.lewigh.migratortasksrfb.engine.*
 import com.lewigh.migratortasksrfb.engine.internal.Task.*
@@ -76,10 +78,8 @@ class TaskDispatcher(
 
         val processor = processors.find { it.goal == currentTask.goal } ?: throw Exception()
 
-        val params = if (currentTask.params != null) {
-            objectMapper.readValue(currentTask.params, Any::class.java)
-        } else {
-            null
+        val params = currentTask.params?.let {
+            objectMapper.readValue(it, object : TypeReference<Map<String, Any>>() {})
         }
 
         val plannedTasksBuffer = mutableListOf<PlannedTask>();

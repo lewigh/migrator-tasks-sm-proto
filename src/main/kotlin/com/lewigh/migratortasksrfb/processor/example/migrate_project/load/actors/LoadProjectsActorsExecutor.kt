@@ -14,8 +14,14 @@ class LoadProjectsActorsExecutor(override val goal: TaskGoal = TaskGoal.LOAD_PRO
         var planned = mutableListOf<PlannedTask>()
 
         for (i in 0..500 step 100) {
-            val params = PageModel(100, i)
-            planned.add(PlannedTask(TaskGoal.LOAD_PROJECT_ACTORS_BATCH, title = "Загрузка акторов с $i по ${i + 99}", parameters = params))
+            planned.add(
+                PlannedTask(
+                    TaskGoal.LOAD_PROJECT_ACTORS_BATCH, title = "Загрузка акторов с $i по ${i + 99}", parameters = mapOf(
+                        Parameters.size to 100,
+                        Parameters.offset to i
+                    )
+                )
+            )
         }
 
         planner.parralel(*planned.toTypedArray())
