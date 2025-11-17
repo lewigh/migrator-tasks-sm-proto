@@ -1,5 +1,6 @@
 package com.lewigh.migratortasksrfb.engine.internal
 
+import com.fasterxml.jackson.databind.*
 import com.lewigh.migratortasksrfb.*
 import com.lewigh.migratortasksrfb.engine.*
 import com.lewigh.migratortasksrfb.engine.internal.Task.*
@@ -12,7 +13,7 @@ import java.util.concurrent.*
 
 @Component
 class TaskDispatcher(
-    val repo: TaskRepository, val handlers: List<TaskProcessor>, private val executor: ExecutorService, val txManager: TransactionalComponent
+    val repo: TaskRepository, val handlers: List<TaskProcessor>, private val executor: ExecutorService, val txManager: TransactionalComponent, private val objectMapper: ObjectMapper
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -64,7 +65,13 @@ class TaskDispatcher(
 
         val executor = handlers.find { it.goal == currentTask.goal } ?: throw Exception()
 
-        executor.process(CurrentTask(currentTask.description, currentTask.params, currentTask.domainId), TaskPlanner(currentTask))
+        val params = if (currentTask.params != null) {
+            objectMapper.readValue(currentTask.params, Any::class.java)
+        } else {
+            null
+        }
+
+        executor.process(CurrentTask(currentTask.description, params, currentTask.domainId), TaskPlanner(currentTask, objectMapper = objectMapper))
 
         currentTask.executed = true
 
@@ -108,7 +115,7 @@ class TaskDispatcher(
             goal = planned.goal,
             status = Status.PENDING,
             description = planned.description,
-            params = planned.parameters,
+            params = objectMapper.writeValueAsString(planned.parameters),
             domainId = planned.domainId,
         )
 

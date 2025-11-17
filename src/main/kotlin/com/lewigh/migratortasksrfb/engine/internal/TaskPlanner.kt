@@ -1,10 +1,11 @@
 package com.lewigh.migratortasksrfb.engine.internal
 
+import com.fasterxml.jackson.databind.*
 import io.github.oshai.kotlinlogging.*
 
 private const val READY_TO_PENDING: Int = 0;
 
-data class TaskPlanner(private val parent: Task, private var currentStage: Int = 0) {
+data class TaskPlanner(private val parent: Task, private var currentStage: Int = 0, private val objectMapper: ObjectMapper) {
 
     private val logger = KotlinLogging.logger {}
 
@@ -30,7 +31,7 @@ data class TaskPlanner(private val parent: Task, private var currentStage: Int =
                 stage = currentStage,
                 parent = parent,
                 domainId = domainId,
-                params = task.parameters
+                params = objectMapper.writeValueAsString(task.parameters)
             )
             parent.subtasks.add(newSubtask)
 
