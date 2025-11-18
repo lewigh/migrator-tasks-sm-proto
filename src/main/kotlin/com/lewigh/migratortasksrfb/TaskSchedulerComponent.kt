@@ -5,10 +5,10 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 @Component
-class TaskSchedulerComponent(val service: TaskDispatcher) {
+class TaskSchedulerComponent(val dispatcher: TaskDispatcher) {
 
     @Scheduled(fixedRate = 5000)
     fun handle() {
-        service.dispatchRound()
+        dispatcher.dispatchRound()
     }
 }

@@ -25,7 +25,7 @@ class TaskDispatcher(
 
     @Transactional
     fun planNewTask(planned: PlannedTask): Task {
-        val migrationTask = plannedTaskToTask(planned, Status.PENDING, null)
+        val migrationTask = plannedTaskToEntityTask(planned, Status.PENDING, null)
 
         return repo.save(migrationTask)
     }
@@ -37,7 +37,7 @@ class TaskDispatcher(
         val (plannables, executables) = tasks.partition { it.executed }
 
         for (task in plannables) {
-            planTasks(task)
+            planTask(task)
         }
 
         for (task in executables) {
@@ -75,7 +75,9 @@ class TaskDispatcher(
 
     private fun executeTask(currentTask: Task) {
 
-        val processor = processors.find { it.goal == currentTask.goal } ?: throw Exception()
+        val processor = processors
+            .find { it.goal == currentTask.goal }
+            ?: throw IllegalStateException("Couldn't execute task - processor for goal:${currentTask.goal} not found")
 
         val params = currentTask.params?.let {
             objectMapper.readValue(it, object : TypeReference<Map<String, Any>>() {})
@@ -83,9 +85,9 @@ class TaskDispatcher(
 
         val plannedTasksBuffer = mutableListOf<PlannedTask>();
 
-        processor.process(CurrentTask(currentTask.title, params, currentTask.domainId), TaskPlanner(plannedTasksBuffer))
+        processor.process(CurrentTask(currentTask.title, currentTask.domainId, params), TaskPlanner(plannedTasksBuffer))
 
-        currentTask.subtasks = plannedTasksToTasks(plannedTasksBuffer, currentTask)
+        currentTask.subtasks = plannedTasksToEntityTasks(plannedTasksBuffer, currentTask)
 
         currentTask.executed = true
 
@@ -99,11 +101,12 @@ class TaskDispatcher(
             repo.save(subtask)
         }
 
-        currentTask.waitTo()
+        currentTask.toWait()
+
         repo.save(currentTask)
     }
 
-    private fun planTasks(task: Task) {
+    private fun planTask(task: Task) {
 
         if (task.isAllSubtaskDone()) {
             task.doneThenWakeUpParent()
@@ -119,11 +122,11 @@ class TaskDispatcher(
             task.planNextStageWaitingTasks()
         }
 
-        task.waitTo()
+        task.toWait()
     }
 
 
-    private fun plannedTasksToTasks(tasks: List<PlannedTask>, parent: Task): MutableList<Task> {
+    private fun plannedTasksToEntityTasks(tasks: List<PlannedTask>, parent: Task): MutableList<Task> {
 
         val subtasks = mutableListOf<Task>();
 
@@ -135,7 +138,7 @@ class TaskDispatcher(
                 Task.Status.WAITING
             }
 
-            val newSubtask = plannedTaskToTask(task, plannedStatus, parent)
+            val newSubtask = plannedTaskToEntityTask(task, plannedStatus, parent)
 
             subtasks.add(newSubtask)
 
@@ -145,7 +148,7 @@ class TaskDispatcher(
         return subtasks
     }
 
-    private fun plannedTaskToTask(
+    private fun plannedTaskToEntityTask(
         plannedTask: PlannedTask,
         plannedStatus: Status,
         parent: Task?,

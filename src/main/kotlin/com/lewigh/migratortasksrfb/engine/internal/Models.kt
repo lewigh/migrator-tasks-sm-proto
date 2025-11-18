@@ -5,8 +5,8 @@ import com.lewigh.migratortasksrfb.engine.*
 
 data class CurrentTask(
     val title: String,
-    val params: Map<String, Any>? = null,
-    val domainId: String?
+    val domainId: String?,
+    val params: Map<String, Any>? = null
 )
 
 data class PlannedTask(

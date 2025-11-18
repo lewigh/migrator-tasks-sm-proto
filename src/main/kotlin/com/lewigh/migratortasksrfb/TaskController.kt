@@ -13,7 +13,8 @@ public class TaskController(
     val repo: TaskRepository,
     val service: TaskDispatcher,
     private val error: View,
-    private val taskDispatcher: TaskDispatcher
+    private val taskDispatcher: TaskDispatcher,
+    private val jsonComponent: JsonComponent
 ) {
 
     private var started = false
@@ -50,7 +51,7 @@ public class TaskController(
         var domainId: String?,
         var stage: Int,
         var executed: Boolean,
-        var params: String?,
+        var params: Map<String, Any>?,
         var error: String?,
         var subtasks: MutableList<TaskDto>,
     )
@@ -67,7 +68,7 @@ public class TaskController(
             subtasks = task.subtasks.map { mapToDto(it) }.toMutableList(),
             error = task.error,
             domainId = task.domainId,
-            params = task.params
+            params = task.params?.let { jsonComponent.toMap(it) }
         )
     }
 }

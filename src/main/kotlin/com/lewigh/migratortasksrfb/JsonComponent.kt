@@ -2,7 +2,9 @@ package com.lewigh.migratortasksrfb
 
 import com.fasterxml.jackson.core.type.*
 import com.fasterxml.jackson.databind.*
+import org.springframework.stereotype.*
 
+@Component
 class JsonComponent(private val objectMapper: ObjectMapper) {
 
     fun fromMap(map: Map<String, Any>): String {

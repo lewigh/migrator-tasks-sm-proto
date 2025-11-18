@@ -44,7 +44,7 @@ class Task(
         status = Status.RUNNING
     }
 
-    fun waitTo() {
+    fun toWait() {
         status = Status.WAITING
     }
 
