@@ -5,7 +5,7 @@ import com.lewigh.migratortasksrfb.engine.internal.*
 import org.springframework.stereotype.Component
 
 @Component
-class LoadProjectCommentsExecutor(override val goal: TaskGoal = TaskGoal.LOAD_PROJECT_COMMENTS) : TaskProcessor {
+class LoadProjectCommentsProcessor(override val goal: TaskGoal = TaskGoal.LOAD_PROJECT_COMMENTS) : TaskProcessor {
 
     override fun process(current: CurrentTask, planner: TaskPlanner) {
 

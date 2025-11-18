@@ -12,7 +12,7 @@ class Task(
     @JoinColumn(name = "parent_id")
     @ManyToOne(fetch = FetchType.LAZY)
     var parent: Task? = null,
-    var domainId: String,
+    var contextId: String,
     var title: String,
     var goal: TaskGoal,
     var status: Status,

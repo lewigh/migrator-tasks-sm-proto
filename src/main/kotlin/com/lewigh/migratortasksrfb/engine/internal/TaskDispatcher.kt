@@ -21,8 +21,8 @@ class TaskDispatcher(
     private val logger = KotlinLogging.logger {}
 
     @Transactional
-    fun planRootTask(domainId: String, planned: PlannedTask): Task {
-        val rootTask = plannedTaskToEntityTask(planned, Status.PENDING, domainId, null)
+    fun planRootTask(contextId: String, planned: PlannedTask): Task {
+        val rootTask = plannedTaskToEntityTask(planned, Status.PENDING, contextId, null)
 
         return repo.save(rootTask)
     }
@@ -80,7 +80,7 @@ class TaskDispatcher(
 
         val plannedTasksBuffer = mutableListOf<PlannedTask>();
 
-        processor.process(CurrentTask(currentTask.title, currentTask.domainId, params), TaskPlanner(plannedTasksBuffer))
+        processor.process(CurrentTask(currentTask.title, currentTask.contextId, params), TaskPlanner(plannedTasksBuffer))
 
         currentTask.subtasks = plannedTasksToEntityTasks(plannedTasksBuffer, currentTask)
 
@@ -133,7 +133,7 @@ class TaskDispatcher(
                 Task.Status.WAITING
             }
 
-            val newSubtask = plannedTaskToEntityTask(task, plannedStatus, parent.domainId, parent)
+            val newSubtask = plannedTaskToEntityTask(task, plannedStatus, parent.contextId, parent)
 
             subtasks.add(newSubtask)
 
@@ -146,7 +146,7 @@ class TaskDispatcher(
     private fun plannedTaskToEntityTask(
         plannedTask: PlannedTask,
         plannedStatus: Status,
-        domainId: String,
+        contextId: String,
         parent: Task?,
     ) = Task(
         title = plannedTask.title,
@@ -154,7 +154,7 @@ class TaskDispatcher(
         status = plannedStatus,
         stage = plannedTask.stage,
         parent = parent,
-        domainId = domainId,
+        contextId = contextId,
         params = plannedTask.params?.let { jsonComponent.fromMap(it) },
     )
 

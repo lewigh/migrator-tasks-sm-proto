@@ -1,4 +1,4 @@
-package com.lewigh.migratortasksrfb.processor.example.migrate_project.load.actors.load
+package com.lewigh.migratortasksrfb.processor.example.migrate_project.load.actors.batch
 
 import com.fasterxml.jackson.databind.*
 import com.lewigh.migratortasksrfb.engine.*
@@ -7,7 +7,7 @@ import io.github.oshai.kotlinlogging.*
 import org.springframework.stereotype.Component
 
 @Component
-class LoadProjectActorsExecutor(override val goal: TaskGoal = TaskGoal.LOAD_PROJECT_ACTORS_BATCH, private val objectMapper: ObjectMapper) : TaskProcessor {
+class LoadBatchProjectActorsProcessor(override val goal: TaskGoal = TaskGoal.LOAD_PROJECT_ACTORS_BATCH, private val objectMapper: ObjectMapper) : TaskProcessor {
 
     private val logger = KotlinLogging.logger {}
 

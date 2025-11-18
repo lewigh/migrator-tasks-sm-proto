@@ -5,7 +5,7 @@ import com.lewigh.migratortasksrfb.engine.internal.*
 import org.springframework.stereotype.Component
 
 @Component
-class LoadProjectSchemaExecutor(override val goal: TaskGoal = TaskGoal.LOAD_PROJECT_SCHEMA) : TaskProcessor {
+class LoadProjectSchemasProcessor(override val goal: TaskGoal = TaskGoal.LOAD_PROJECT_SCHEMA) : TaskProcessor {
 
     override fun process(current: CurrentTask, planner: TaskPlanner) {
         //throw RuntimeException("AAA")

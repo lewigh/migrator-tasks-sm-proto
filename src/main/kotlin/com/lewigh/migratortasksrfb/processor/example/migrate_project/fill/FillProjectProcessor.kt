@@ -5,7 +5,7 @@ import com.lewigh.migratortasksrfb.engine.internal.*
 import org.springframework.stereotype.Component
 
 @Component
-class FillProjectExecutor(override val goal: TaskGoal = TaskGoal.PROJECT_FILL) : TaskProcessor {
+class FillProjectProcessor(override val goal: TaskGoal = TaskGoal.PROJECT_FILL) : TaskProcessor {
 
     override fun process(current: CurrentTask, planner: TaskPlanner) {
         planner.parralel(

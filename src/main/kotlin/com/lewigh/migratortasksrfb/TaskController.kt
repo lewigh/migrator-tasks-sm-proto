@@ -48,7 +48,7 @@ public class TaskController(
         var status: Status,
         var goal: TaskGoal,
         var parentId: Long?,
-        var domainId: String,
+        var contextId: String,
         var stage: Int,
         var executed: Boolean,
         var params: Map<String, Any>?,
@@ -67,7 +67,7 @@ public class TaskController(
             executed = task.executed,
             subtasks = task.subtasks.map { mapToDto(it) }.toMutableList(),
             error = task.error,
-            domainId = task.domainId,
+            contextId = task.contextId,
             params = task.params?.let { jsonComponent.toMap(it) }
         )
     }

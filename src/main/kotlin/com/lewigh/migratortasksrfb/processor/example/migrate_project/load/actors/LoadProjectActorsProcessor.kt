@@ -7,7 +7,7 @@ import com.lewigh.migratortasksrfb.processor.example.migrate_project.*
 import org.springframework.stereotype.Component
 
 @Component
-class LoadProjectsActorsExecutor(override val goal: TaskGoal = TaskGoal.LOAD_PROJECT_ACTORS, private val objectMapper: ObjectMapper) : TaskProcessor {
+class LoadProjectActorsProcessor(override val goal: TaskGoal = TaskGoal.LOAD_PROJECT_ACTORS, private val objectMapper: ObjectMapper) : TaskProcessor {
 
     override fun process(current: CurrentTask, planner: TaskPlanner) {
 
