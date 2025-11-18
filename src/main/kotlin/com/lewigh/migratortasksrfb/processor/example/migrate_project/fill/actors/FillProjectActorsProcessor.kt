@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 @Component
 class FillProjectActorsProcessor(override val goal: TaskGoal = TaskGoal.FILL_PROJECT_ACTORS) : TaskProcessor {
 
-    override fun process(current: CurrentTask, planner: TaskPlanner) {
+    override fun process(current: CurrentTaskInfo, planner: TaskPlanner) {
         //throw RuntimeException("AAA")
         Thread.sleep(3_000)
     }

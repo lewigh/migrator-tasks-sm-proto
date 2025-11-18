@@ -7,9 +7,15 @@ import org.springframework.stereotype.Component
 @Component
 class LoadProjectCommentsProcessor(override val goal: TaskGoal = TaskGoal.LOAD_PROJECT_COMMENTS) : TaskProcessor {
 
-    override fun process(current: CurrentTask, planner: TaskPlanner) {
+    private var failed: Boolean = false
 
-        //throw RuntimeException("Венера не отвечает!")
+    override fun process(current: CurrentTaskInfo, planner: TaskPlanner) {
+
+        if (!failed) {
+            failed = true;
+            throw RuntimeException("Венера не отвечает!")
+        }
+        failed = false
         //Thread.sleep(5_000)
     }
 }

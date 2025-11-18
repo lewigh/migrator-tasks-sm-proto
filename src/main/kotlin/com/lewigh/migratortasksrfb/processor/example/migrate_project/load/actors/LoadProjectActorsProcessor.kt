@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 @Component
 class LoadProjectActorsProcessor(override val goal: TaskGoal = TaskGoal.LOAD_PROJECT_ACTORS, private val objectMapper: ObjectMapper) : TaskProcessor {
 
-    override fun process(current: CurrentTask, planner: TaskPlanner) {
+    override fun process(current: CurrentTaskInfo, planner: TaskPlanner) {
 
         var planned = mutableListOf<PlannedTask>()
 

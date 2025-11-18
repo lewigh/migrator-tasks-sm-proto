@@ -12,7 +12,7 @@ class LoadBatchProjectActorsProcessor(override val goal: TaskGoal = TaskGoal.LOA
     private val logger = KotlinLogging.logger {}
 
 
-    override fun process(current: CurrentTask, planner: TaskPlanner) {
+    override fun process(current: CurrentTaskInfo, planner: TaskPlanner) {
         val value = current.params
 
         logger.info { "Начинаю загрузку акторов в количестве ${value?.get("size")} от ${value?.get("offset")}" }

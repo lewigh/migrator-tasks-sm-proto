@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 @Component
 class FillProjectSchemasProcessor(override val goal: TaskGoal = TaskGoal.FILL_PROJECT_SCHEMA) : TaskProcessor {
 
-    override fun process(current: CurrentTask, planner: TaskPlanner) {
+    override fun process(current: CurrentTaskInfo, planner: TaskPlanner) {
         //throw RuntimeException("AAA")
         Thread.sleep(2_000)
     }

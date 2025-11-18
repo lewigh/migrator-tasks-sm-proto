@@ -26,21 +26,29 @@ class Task(
 ) {
 
     fun isRunning(): Boolean = status == Status.RUNNING
-    fun isPending(): Boolean = status == Status.PENDING
-    fun isDone(): Boolean = status == Status.DONE
-    fun isError(): Boolean = status == Status.ERROR
-    fun isWaiting(): Boolean = status == Status.WAITING
-    fun isCorrupted(): Boolean = status == Status.CORRUPTED
-    fun isAllSubtaskDone(): Boolean = subtasks.all { it.isDone() }
-    fun isAnySubtaskFailured(): Boolean = subtasks.any { it.isError() || it.isCorrupted() }
-    fun hasSubtasksToPlan(): Boolean = subtasks.all { it.status == Status.DONE || it.status == Status.WAITING }
 
-    fun doneThenWakeUpParent() {
-        parent?.status = Status.PENDING
+    fun isPending(): Boolean = status == Status.PENDING
+
+    fun isDone(): Boolean = status == Status.DONE
+
+    fun isError(): Boolean = status == Status.ERROR
+
+    fun isWaiting(): Boolean = status == Status.WAITING
+
+    fun isCorrupted(): Boolean = status == Status.CORRUPTED
+
+    fun isAllSubtaskDone(): Boolean = subtasks.all { it.isDone() }
+
+    fun isAnySubtaskFailured(): Boolean = subtasks.any { it.isError() || it.isCorrupted() }
+
+    fun hasSubtasksToRun(): Boolean = subtasks.all { it.status == Status.DONE || it.status == Status.WAITING }
+
+    fun toDoneAndWakeUpParent() {
+        wakeUpParent()
         status = Status.DONE
     }
 
-    fun run() {
+    fun toRun() {
         status = Status.RUNNING
     }
 
@@ -48,7 +56,7 @@ class Task(
         status = Status.WAITING
     }
 
-    fun pending() {
+    fun toPending() {
         status = Status.PENDING
     }
 
@@ -56,7 +64,7 @@ class Task(
         status = Status.CORRUPTED
     }
 
-    fun error(exception: Exception) {
+    fun toError(exception: Exception) {
 
         var cur: Throwable? = exception
         var res: String = ""
@@ -67,22 +75,35 @@ class Task(
             cur = cur.cause
         }
 
-        error(res)
+        toError(res)
     }
 
-    fun error(text: String) {
+    fun toError(text: String) {
         status = Status.ERROR
         error = text
         parent?.status = Status.PENDING
     }
 
-    fun planNextStageWaitingTasks() {
+    fun planNextStageWaitingTasksToPending() {
         subtasks.asSequence()
             .filter { it.isWaiting() }
             .groupBy { it.stage }
             .toSortedMap()
             .firstEntry().value
-            .forEach { it.pending() }
+            .forEach { it.toPending() }
+    }
+
+    fun toRerun() {
+        if (subtasks.isNotEmpty()) {
+        } else {
+            this.error = null
+            toPending()
+            wakeUpParent()
+        }
+    }
+
+    fun wakeUpParent() {
+        parent?.status = Status.PENDING
     }
 
     enum class Status {

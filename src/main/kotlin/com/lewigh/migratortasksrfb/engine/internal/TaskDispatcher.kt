@@ -49,7 +49,7 @@ class TaskDispatcher(
                     val task = requireNotNull(repo.findByIdOrNull(taskId))
 
                     txManager.withNew {
-                        task.run()
+                        task.toRun()
                         onTaskRun(task)
                         repo.save(task)
                     }
@@ -58,7 +58,7 @@ class TaskDispatcher(
                         executeTask(task)
                     } catch (e: Exception) {
                         logger.error(e) {}
-                        task.error(e)
+                        task.toError(e)
                     }
                 }
             } catch (e: PersistenceException) {
@@ -80,14 +80,17 @@ class TaskDispatcher(
 
         val plannedTasksBuffer = mutableListOf<PlannedTask>();
 
-        processor.process(CurrentTask(currentTask.title, currentTask.contextId, params), TaskPlanner(plannedTasksBuffer))
+        val info = CurrentTaskInfo(currentTask.title, currentTask.contextId, params)
+
+        // Обработка задачи
+        processor.process(info, TaskPlanner(plannedTasksBuffer))
 
         currentTask.subtasks = plannedTasksToEntityTasks(plannedTasksBuffer, currentTask)
 
         currentTask.executed = true
 
         if (currentTask.subtasks.isEmpty()) {
-            currentTask.doneThenWakeUpParent()
+            currentTask.toDoneAndWakeUpParent()
             onTaskCompleted(currentTask)
             return
         }
@@ -104,7 +107,7 @@ class TaskDispatcher(
     private fun planTask(task: Task) {
 
         if (task.isAllSubtaskDone()) {
-            task.doneThenWakeUpParent()
+            task.toDoneAndWakeUpParent()
             return
         }
 
@@ -113,8 +116,8 @@ class TaskDispatcher(
             return
         }
 
-        if (task.hasSubtasksToPlan()) {
-            task.planNextStageWaitingTasks()
+        if (task.hasSubtasksToRun()) {
+            task.planNextStageWaitingTasksToPending()
         }
 
         task.toWait()
@@ -162,7 +165,7 @@ class TaskDispatcher(
         if (parent.goal == task.goal) {
             val message = "Failed task: Couldn't plan child task with the same goal as parent. Parent: ${parent.goal} child $task"
             logger.error { message }
-            newSubtask.error(message)
+            newSubtask.toError(message)
         }
     }
 

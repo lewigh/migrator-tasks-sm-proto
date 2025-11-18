@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 @Component
 class CreateMigrationReportProcessor(override val goal: TaskGoal = TaskGoal.CREATE_MIGRATION_REPORT) : TaskProcessor {
 
-    override fun process(current: CurrentTask, planner: TaskPlanner) {
+    override fun process(current: CurrentTaskInfo, planner: TaskPlanner) {
         Thread.sleep(2_000)
     }
 }

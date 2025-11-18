@@ -3,7 +3,7 @@ package com.lewigh.migratortasksrfb.engine.internal
 import com.lewigh.migratortasksrfb.engine.*
 
 
-data class CurrentTask(
+data class CurrentTaskInfo(
     val title: String,
     val contextId: String,
     val params: Map<String, Any>? = null

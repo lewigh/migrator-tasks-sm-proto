@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 @Component
 class FillProjectCommentsProcessor(override val goal: TaskGoal = TaskGoal.FILL_PROJECT_COMMENTS) : TaskProcessor {
 
-    override fun process(current: CurrentTask, planner: TaskPlanner) {
+    override fun process(current: CurrentTaskInfo, planner: TaskPlanner) {
         //throw RuntimeException("AAA")
         Thread.sleep(5_000)
     }

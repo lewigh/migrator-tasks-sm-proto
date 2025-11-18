@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 @Component
 class FillProjectProcessor(override val goal: TaskGoal = TaskGoal.PROJECT_FILL) : TaskProcessor {
 
-    override fun process(current: CurrentTask, planner: TaskPlanner) {
+    override fun process(current: CurrentTaskInfo, planner: TaskPlanner) {
         planner.parralel(
             PlannedTask(goal = TaskGoal.FILL_PROJECT_SCHEMA, title = "Выгрузка схем в Меркурий 1"),
             PlannedTask(goal = TaskGoal.FILL_PROJECT_ACTORS, title = "Выгрузка акторов в Меркурий 1"),

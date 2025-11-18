@@ -6,9 +6,9 @@ interface TaskProcessor {
 
     val goal: TaskGoal
 
-    fun process(current: CurrentTask, planner: TaskPlanner)
+    fun process(current: CurrentTaskInfo, planner: TaskPlanner)
 
-    fun rollback(current: CurrentTask) {
+    fun rollback(current: CurrentTaskInfo) {
         // по умолчанию откат не предусмотрен
     }
 }
