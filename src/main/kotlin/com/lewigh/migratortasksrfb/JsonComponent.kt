@@ -1,17 +1,10 @@
 package com.lewigh.migratortasksrfb
 
 import com.fasterxml.jackson.core.type.*
-import com.fasterxml.jackson.databind.*
-import org.springframework.stereotype.*
 
-@Component
-class JsonComponent(private val objectMapper: ObjectMapper) {
+interface JsonComponent {
 
-    fun fromMap(map: Map<String, Any>): String {
-        return objectMapper.writeValueAsString(map)
-    }
+    fun fromMap(map: Map<String, Any>): String
 
-    fun toMap(json: String): Map<String, Any> {
-        return objectMapper.readValue(json, object : TypeReference<Map<String, Any>>() {})
-    }
+    fun toMap(json: String): Map<String, Any>
 }

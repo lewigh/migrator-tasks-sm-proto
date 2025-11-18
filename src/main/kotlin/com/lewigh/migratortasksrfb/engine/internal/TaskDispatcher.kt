@@ -1,7 +1,5 @@
 package com.lewigh.migratortasksrfb.engine.internal
 
-import com.fasterxml.jackson.databind.*
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.lewigh.migratortasksrfb.*
 import com.lewigh.migratortasksrfb.engine.*
 import com.lewigh.migratortasksrfb.engine.internal.Task.*
@@ -10,24 +8,23 @@ import jakarta.persistence.*
 import org.springframework.data.repository.*
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import java.util.concurrent.*
 
 @Component
 class TaskDispatcher(
     private val repo: TaskRepository,
     private val processors: List<TaskProcessor>,
-    private val executor: ExecutorService,
+    private val threadPoolComponent: ThreadPoolComponent,
     private val txManager: TransactionalComponent,
-    private val objectMapper: ObjectMapper
+    private val jsonComponent: JsonComponent
 ) {
 
     private val logger = KotlinLogging.logger {}
 
     @Transactional
-    fun planNewTask(planned: PlannedTask): Task {
-        val migrationTask = plannedTaskToEntityTask(planned, Status.PENDING, null)
+    fun planRootTask(domainId: String, planned: PlannedTask): Task {
+        val rootTask = plannedTaskToEntityTask(planned, Status.PENDING, domainId, null)
 
-        return repo.save(migrationTask)
+        return repo.save(rootTask)
     }
 
     @Transactional
@@ -46,7 +43,7 @@ class TaskDispatcher(
     }
 
     private fun executeInParralel(taskId: Long) {
-        executor.submit {
+        threadPoolComponent.launch {
             try {
                 txManager.with {
                     val task = requireNotNull(repo.findByIdOrNull(taskId))
@@ -79,9 +76,7 @@ class TaskDispatcher(
             .find { it.goal == currentTask.goal }
             ?: throw IllegalStateException("Couldn't execute task - processor for goal:${currentTask.goal} not found")
 
-        val params = currentTask.params?.let {
-            objectMapper.readValue(it, object : TypeReference<Map<String, Any>>() {})
-        }
+        val params = currentTask.params?.let { jsonComponent.toMap(it) }
 
         val plannedTasksBuffer = mutableListOf<PlannedTask>();
 
@@ -138,7 +133,7 @@ class TaskDispatcher(
                 Task.Status.WAITING
             }
 
-            val newSubtask = plannedTaskToEntityTask(task, plannedStatus, parent)
+            val newSubtask = plannedTaskToEntityTask(task, plannedStatus, parent.domainId, parent)
 
             subtasks.add(newSubtask)
 
@@ -151,6 +146,7 @@ class TaskDispatcher(
     private fun plannedTaskToEntityTask(
         plannedTask: PlannedTask,
         plannedStatus: Status,
+        domainId: String,
         parent: Task?,
     ) = Task(
         title = plannedTask.title,
@@ -158,8 +154,8 @@ class TaskDispatcher(
         status = plannedStatus,
         stage = plannedTask.stage,
         parent = parent,
-        domainId = plannedTask.domainId ?: parent?.domainId,
-        params = plannedTask.params?.let { objectMapper.writeValueAsString(it) },
+        domainId = domainId,
+        params = plannedTask.params?.let { jsonComponent.fromMap(it) },
     )
 
     private fun validate(task: PlannedTask, newSubtask: Task, parent: Task) {

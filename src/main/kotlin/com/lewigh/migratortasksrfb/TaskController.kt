@@ -28,7 +28,7 @@ public class TaskController(
     @Transactional
     @GetMapping("start")
     fun start() {
-        service.planNewTask(PlannedTask(TaskGoal.PROJECT_MIGRATE, "Миграция проекта Венера1 в Меркурий1", domainId = "0f60fc70-2d7b-4f2d-8254-fd3e7db09cd9"))
+        service.planRootTask("0f60fc70-2d7b-4f2d-8254-fd3e7db09cd9", PlannedTask(TaskGoal.PROJECT_MIGRATE, "Миграция проекта Венера1 в Меркурий1"))
     }
 
     @Transactional
@@ -48,7 +48,7 @@ public class TaskController(
         var status: Status,
         var goal: TaskGoal,
         var parentId: Long?,
-        var domainId: String?,
+        var domainId: String,
         var stage: Int,
         var executed: Boolean,
         var params: Map<String, Any>?,
