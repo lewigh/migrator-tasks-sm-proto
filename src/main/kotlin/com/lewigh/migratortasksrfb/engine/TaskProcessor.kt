@@ -9,6 +9,6 @@ interface TaskProcessor {
     fun process(current: CurrentTask, planner: TaskPlanner)
 
     fun rollback(current: CurrentTask) {
-        // по умолчанию не предусмотрено
+        // по умолчанию откат не предусмотрен
     }
 }

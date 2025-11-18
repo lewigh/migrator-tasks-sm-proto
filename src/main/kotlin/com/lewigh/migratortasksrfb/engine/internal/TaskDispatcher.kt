@@ -1,6 +1,5 @@
 package com.lewigh.migratortasksrfb.engine.internal
 
-import com.fasterxml.jackson.core.type.*
 import com.fasterxml.jackson.databind.*
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.lewigh.migratortasksrfb.*
@@ -157,7 +156,7 @@ class TaskDispatcher(
         stage = plannedTask.stage,
         parent = parent,
         domainId = plannedTask.domainId ?: parent?.domainId,
-        params = plannedTask.parameters?.let { objectMapper.writeValueAsString(it) },
+        params = plannedTask.params?.let { objectMapper.writeValueAsString(it) },
     )
 
     private fun validate(task: PlannedTask, newSubtask: Task, parent: Task) {

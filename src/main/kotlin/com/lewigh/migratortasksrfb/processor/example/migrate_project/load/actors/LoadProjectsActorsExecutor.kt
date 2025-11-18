@@ -16,7 +16,7 @@ class LoadProjectsActorsExecutor(override val goal: TaskGoal = TaskGoal.LOAD_PRO
         for (i in 0..500 step 100) {
             planned.add(
                 PlannedTask(
-                    TaskGoal.LOAD_PROJECT_ACTORS_BATCH, title = "Загрузка акторов с $i по ${i + 99}", parameters = mapOf(
+                    TaskGoal.LOAD_PROJECT_ACTORS_BATCH, title = "Загрузка акторов с $i по ${i + 99}", params = mapOf(
                         Parameters.size to 100,
                         Parameters.offset to i
                     )

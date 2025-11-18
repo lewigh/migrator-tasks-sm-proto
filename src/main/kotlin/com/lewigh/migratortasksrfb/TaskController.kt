@@ -21,7 +21,7 @@ public class TaskController(
     @GetMapping
     fun getAllTasks(): List<TaskDto> {
         return repo.findAllByGoal(TaskGoal.PROJECT_MIGRATE)
-            .map { mapT(it) }
+            .map { mapToDto(it) }
     }
 
     @Transactional
@@ -55,7 +55,7 @@ public class TaskController(
         var subtasks: MutableList<TaskDto>,
     )
 
-    fun mapT(task: Task): TaskDto {
+    fun mapToDto(task: Task): TaskDto {
         return TaskDto(
             id = requireNotNull(task.id),
             parentId = task.parent?.id,
@@ -64,7 +64,7 @@ public class TaskController(
             title = task.title,
             stage = task.stage,
             executed = task.executed,
-            subtasks = task.subtasks.map { mapT(it) }.toMutableList(),
+            subtasks = task.subtasks.map { mapToDto(it) }.toMutableList(),
             error = task.error,
             domainId = task.domainId,
             params = task.params

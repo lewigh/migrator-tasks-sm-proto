@@ -3,7 +3,6 @@ package com.lewigh.migratortasksrfb.processor.example.migrate_project.load.actor
 import com.fasterxml.jackson.databind.*
 import com.lewigh.migratortasksrfb.engine.*
 import com.lewigh.migratortasksrfb.engine.internal.*
-import com.lewigh.migratortasksrfb.processor.example.migrate_project.*
 import io.github.oshai.kotlinlogging.*
 import org.springframework.stereotype.Component
 
@@ -14,7 +13,7 @@ class LoadProjectActorsExecutor(override val goal: TaskGoal = TaskGoal.LOAD_PROJ
 
 
     override fun process(current: CurrentTask, planner: TaskPlanner) {
-        val value = current.parameters
+        val value = current.params
 
         logger.info { "Начинаю загрузку акторов в количестве ${value?.get("size")} от ${value?.get("offset")}" }
         Thread.sleep(5_000)
